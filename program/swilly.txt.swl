@@ -1,0 +1,34 @@
+1>Swilly the Pig
+
+Ryan Paul and I have been working on Swil graphics.
+
+#>
+    <a href="/swl/doc/swl.gif">The original SWL logo</a>
+    <a href="/graphics/swilly-536.png">Ryan Paul's excellent shaded version.</a>
+    <a href="/graphics/src/swilly-3.png">A vector rendition.</a>
+    <a href="/graphics/src/swilly-2.png">A simplified graphic.</a>
+/>
+
+I created [1] for SWL 2.  I sketched the image on a 3x5 note card and scanned it.  Dan Restuccio and I processed the image in Adobe Illustrator and produced a vectorized version and filled the cells with solid colors.  This appears in the SWL 2 documentation.
+
+Ryan Paul has been studying how to use < //www.inkscape.org Inkscape >, a powerful graphics editor for Linux, to produce high-quality, cell-shaded images.  His first attempt was on his personal, lambda-penguin logo.  Ryan produced [2] with this technique, applying cell shading techniques to the cells of [1].  Ryan chose to use an obnoxious yellow for the tie to <b>fabulous</b> effect, < //www.urbandictionary.com/define.php?term=imho IMHO >.
+
+Ryan and I collected comments on the new logo.  A friend of his, used the theme to produce their first Inkscape image.  Although his choice of color for the pig would "< http://www.questionablecontent.net/view.php?comic=420 "cause glaucoma at twenty paces" >", he did get a few things right that I didn't in my sketch.  For one, he made the coffee cup look like a coffee cup.  Mine turned out more like a gravy saucer.  He also chose white for the cup and put spots on the tie, which Ryan Paul and I thoroughly approved of.  The spots, in my imagination, are bubbles from the < http://dictionary.reference.com/search?q=swill swill >.  Ryan Witt thought it would look better with glasses and a pocket protector, to go with his tie-clip.  My coworker, Meshaal, suggested that it wasn't abstract or simplified enough to scale to icon size or be representative as a logo.  Also, Trevor Bortins suggested that, since I pointed out that the swill cup is a < //java.sun.com Java > parody, I should somehow work the "steam" motif in, since that's the most prominent feature of their mark.
+
+I recreated the logo with vectors to produce [3].  In this version, I integrated the white <i>cup</i>, the glasses, the yellow tie, and spots.  I think I might attempt to render "steam" in the tie next time.
+
+Rendition [4] is for Meshaal.  The pig is ridiculously iconified into a largely circular composition, between the pig and the cup.  This rendition doesn't have the wide support of [3], but it has its adorable merits.
+
+I also made icons.
+
+#>
+    < /graphics/swil-icon.png >
+    < /graphics/moo-icon.png >
+    < /graphics/moosh-icon.png >
+    < /graphics/moot-icon.png >
+    < /graphics/moot-icon-1.png >
+    < /graphics/moot-icon-2.png >
+/>
+
+SWL used a snout icon extracted from the first logo.  I generalized the notion of the snout abstraction, since, so all of our icons bear the theme.  [1] is the decided Swil 3 icon.  [2] is the Moosh icon, already in use for the Moosh Firefox extension, < /moosh >.  [4] is Ryan Paul's idea for the Moot icon.  The yin yang motif conveys the sense of disperate people interacting to produce a cohesive whole.  [5] and [6] were my original attempts to convey a "meeting" of cow snouts and a <tt>diff</tt> of a cow snout.  We're running with the yin yang, but I'm still trying to find an idea for the icon that is less tenuous than these.
+

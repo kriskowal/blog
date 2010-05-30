@@ -1,0 +1,47 @@
+1>Don't Repeat Yourself: or Javascript DOM Initializers
+
+I think I did something clever.  Once again, it's time to fight the losing battle of explanation.  I find that I've been repeating myself a lot in Javascript.  Worse, I've had to compromise my ideals pretty frequently.  Consider the following Javascript.
+
+">
+ &lt;html&gt;
+  &lt;head&gt;
+   &lt;script src="/javascript/modules.js"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+   &lt;div id="clock_0"&gt;&lt;/div&gt;
+   &lt;script&gt;
+    require('clock.js', function (clock) {
+     clock.Clock(
+      document.getElementById('clock.js')
+     );
+    });
+   &lt;/script&gt;
+  &lt;/body&gt;
+ &lt;/html&gt;
+/>
+
+
+In this example, I've installed the Cixar Javascript module loader.  This gives me a global function called <tt>require</tt> that fetches javascripts and loads them as singleton modules and returns the module object or calls a given function closure with the module object.  I then populate my document with HTML and bless the HTML with Javascripts.  In this case, I set up a clock.  The details of how this clock works are hidden in a <tt>Clock</tt> type that is in turn hidden within a <tt>clock</tt> module.  This particular setup requires that any blessed DOM element have an identifier so that it can be in turn fetched by name in the Javascript.
+
+It turns out that this pattern of laying out out a DOM element like a <tt>div</tt> followed by a <tt>script</tt> to imbue it with DHTML powers is pretty common in my Ish project.  This makes for a lot of <tt>script</tt> blocks but also makes the server side code rather orthogonal and elegant.  It's not that bad, and I am proud it's this clean so far.
+
+However, it could be much cleaner.  Consider this example that I implemented today.
+
+">
+ &lt;html&gt;
+  &lt;head&gt;
+   &lt;script src="/javascript/modules.js"&gt;&lt;/script&gt;
+   &lt;script&gt;require('init.js')&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+   &lt;div require="clock.js#Clock"&gt;&lt;/div&gt;
+  &lt;/body&gt;
+ &lt;/html&gt;
+/>
+
+Observe that with this approach, the <tt>div</tt> element does not have an identifier nor a corresponding <tt>script</tt> block.  Instead, I've loaded an <tt>init.js</tt> module (the name will change when you email me a better one).  The <tt>init.js</tt> module sets up a page load listener.  When the page loads, the initializer scans the entire DOM for elements with <tt>require</tt> or <tt>requireRelative</tt> attributes.  It then loads the given module, extracts the given function from the module, and blesses the corresponding element with that function.
+
+I suspect this has a hidden advantage in addition to elegance.  With the previous strategy, every DOM element had a corresponding <tt>getElementById</tt> call.  I suspect that <tt>getElementById</tt> traverses the DOM until it finds an element with the given ID (plausibly, the browser tracks an (id, element) mapping dynamically, but this would be tricky to implement correctly).  The old approach requires one of these traversals for every blessed DOM element.  This new approach only requires one traversal of the document per page load.
+
+So, two questions for the audience.  What should this module be called instead of <tt>init.js</tt>?  Alternately, should this behavior be automatically installed by <tt>modules.js</tt>?
+

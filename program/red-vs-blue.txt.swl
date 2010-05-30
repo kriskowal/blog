@@ -1,0 +1,41 @@
+1>Red vs Blue
+
+Shawn Tice and I developed a random maze generator for the < /moot/Mage "M.U.D." > project.  The purpose of our design was to generate a closed world of arbitrary size, where all rooms are accessible from any other.
+
+We restricted the world's shape to square with sides that measure as powers of two.  That way, we could recursively generate the world with the following rules:
+#>
+    for all rooms larger than a unit room (1x1)
+    #>
+        the room posesses four rooms, one in each quadrant
+        the room posesses four exits that are either passable or walled
+        any exit that is passable may be divided in half, closed in by a wall on either side
+        between each quadrant is a partition
+        at most, one partition is a wall
+        all other partitions are passable, guaranteeing that all quadrants are accessible by at least one path.
+    />
+    for all rooms
+    #>
+        all surrounding partitions are walls if they do not lead to a room
+    />
+/>
+
+
+Here's how one maze turned out:
+<img src="/~ainalda/bdoc/program/red-vs-blue/maze.gif"/>
+The numbers represent the width of each room in the following diagram.  Each successive maze is a more detailed version of the previous.
+
+For the purpose of testing, we'll probably populate this maze with two warring clans, Red versus Blue.  I doctored an image off of < http://www.nuklearpower.com/latest.php "Eight Bit Theatre" > with Macromedia Fireworks for the purpose.  For kicks, I made the layers functional.
+
+:>
+<p>
+<img src="/~ainalda/bdoc/program/red-vs-blue/red.png"/>
+<img src="/~ainalda/bdoc/program/red-vs-blue/red-hair.gif"/>
+<img src="/~ainalda/bdoc/program/red-vs-blue/red-shoulders.gif"/>
+<img src="/~ainalda/bdoc/program/red-vs-blue/red-breastplate.gif"/>
+<img src="/~ainalda/bdoc/program/red-vs-blue/red-tunic.gif"/>
+<img src="/~ainalda/bdoc/program/red-vs-blue/red-pants.gif"/>
+<img src="/~ainalda/bdoc/program/red-vs-blue/red-naked.gif"/>
+</p>
+/>
+
+The first image is the PNG.  The original image probably belongs to < http://www.squaresoft.com/ Square-Enix >.

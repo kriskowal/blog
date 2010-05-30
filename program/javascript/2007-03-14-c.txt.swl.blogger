@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-5674222320240382416</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;I had an epiphany when writing a module loader.  The trouble is that I didn't want modules to have access or ability to mess with the module loader's local variables.  Since I was just calling &lt;tt&gt;eval&lt;/tt&gt; with the text of the module, it had all of this access for reading and writing.  Since I don't trust even myself, this was not acceptable.  The problem was finding a way to sweep all the names under the carpet.&lt;/p&gt;
+&lt;p&gt;Here's the trivial solution:&lt;/p&gt;
+
+&lt;pre&gt;
+(function () {
+	/* module loader */
+	this.require = function (url) {
+		var require = function (url) {
+			/* this require is for the module */
+		};
+		var text = http.requestText(url);
+		eval(text);
+	}
+})();&lt;/pre&gt;
+&lt;p&gt;Here's a less naive solution:&lt;/p&gt;
+
+&lt;pre&gt;
+var evalModule = function (text, require) {
+	eval(text);
+};
+(function () {
+	this.require = function (url) {
+		var text = http.requestText(url);
+		var require = function (url) {};
+		evalModule(text, require);
+	};
+})()&lt;/pre&gt;
+&lt;p&gt;That solution still leaves &lt;tt&gt;evalModule&lt;/tt&gt; as a variable that the module could potentially supplant.  I needed to isolate &lt;tt&gt;evalModule&lt;/tt&gt;.  My solution uses a member variable of a &lt;tt&gt;jail&lt;/tt&gt; object which eventually gets populated with the &lt;tt&gt;evalModule&lt;/tt&gt; function without giving the closure access to either &lt;tt&gt;jail&lt;/tt&gt; or itself..&lt;/p&gt;
+
+&lt;pre&gt;
+(function () {
+	var jail = {};
+	this.require = function (url) {
+		var text = http.requestText(url);
+		var require = function (url) {};
+		evalModule(text, require);
+	};
+	return jail;
+})().evalModule = function (text, require) {
+	eval(text);
+}&lt;/pre&gt;
+&lt;p&gt;Of course, it's not enough to isolate the module in a closure.  I also give it a &lt;tt&gt;Module&lt;/tt&gt; object as its context object.&lt;/p&gt;
+
+&lt;pre&gt;
+(function () {
+	var jail = {};
+	this.require = function (url) {
+		var text = http.requestText(url);
+		var require = function (url) {};
+		var module = new Module(url);
+		evalModule.call(module, text, require);
+	};
+	return jail;
+})().evalModule = function (text, require) {
+	eval(text);
+}&lt;/pre&gt;
+&lt;p&gt;So, modules look like this:&lt;/p&gt;
+
+&lt;pre&gt;
+var module = this;
+assert(this != window);
+with (require('module.js')) {
+	/* go do stuff without fear of name collisions */
+}&lt;/pre&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:53.767-07:00</ns0:updated><ns0:published>2007-03-14T21:48:00.001-07:00</ns0:published><ns0:title type="text">Javascript Module Loader</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/5674222320240382416/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=5674222320240382416" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/5674222320240382416" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/5674222320240382416" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2007/03/javascript-module-loader_14.html" rel="alternate" title="Javascript Module Loader" type="text/html" /></ns0:entry>

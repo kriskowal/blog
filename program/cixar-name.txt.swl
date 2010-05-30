@@ -1,0 +1,15 @@
+
+1>Cixar
+
+=.email-mangle>yes
+
+For the record, the name <i>Cixar</i> doesn't, in itself, mean anything.  Rather, the name is an attempt to draw multiple parallels.
+
+It starts with my moniker, Cowbert.  Actually, it starts with my lack of a monicker.  My sister, < http://kathleenkowal.com Kathy >, has always had a "theme" for each phase she's passed through, albeit pandas, kiwis, or elephants.  I, on the other hand, until the age of seventeen, was as stolid as a cow.  Kathy meant to break this mould.  She gave me <a href="/~ainalda/sam.gif">a plush cow</a> she earned for selling recipe books as my 18th birthday present.  At the time, I read Dilbert quite heavily, and was planning to make a parody.  Scott Adams claims in < http://froogle.google.com/froogle?q=the%20dilbert%20future&hl=en&lr=&sa=N&tab=wf "The Dilbert Future" > that his idea of originality is reading Garfield and changing all the jokes so they fit Dogbert.  So, I made a < http://vonmoo.com/feature/comic/1/ "Cowbert comic" > wherein I bore a striking resemblance to a particular, cube-headed, plush cow.  To clinch it, < cowbert@hotmail.com > was still available.  So, these long years later, I am Baron Cowbert von&nbsp;Moo.
+
+At the time, < /~segphault "Ryan Paul" > and I were throwing together ideas for a new < //mudconnector.com MUD >, we were attributing IdealMUD, since we weren't ready to rule out any particular set of features for practical purposes yet.  Quickly, the term "Cix" filled the analogous role for a collection of "Cowix" operating system ideas.  < //burntorange.caltech.edu "Ryan Witt" > posited that "Cix" inherently "Cix OS", especially in a British accent.  Cix has since evolved into < /moot "a pile of ideas" >, not so much for an operating system, but for an internally consistent platform.  Of course, it isn't internally consistent, but we plan to build Gnomebots to sort it all out.
+
+Some of those ideas included "graphical command line" names for applications.  Taking a page from Latin, the names were inflected.  Each application had a three letter root representing the type of data it operated on.  This base corresponded to the file extension.  Then each application had a suffix of "or" for "edit-ors", "er" for "view-ers", and "ing" for daemons, a.k.a, services.  For example; <tt>*.tex</tt> text files edited with <tt>texor</tt>, viewed with <tt>texer</tt>; <tt>*.pix</tt> picture files edited with <tt>pixor</tt>, viewed with <tt>pixer</tt>; tabular data edited with <tt>tabor</tt> and served with <tt>tabing</tt>.  Of course there was in internal implication that Texar, Tabar, Datar, Vexar, and <i>Pixar</i> would be fantastic names for teams, companies, or loosely governed alliances of hackers devoted to the development of these tools.  Then Ryan Witt bought <tt>cixar.com</tt> for our eventual Internet home, sealing the name around us like < http://cixar.com/~segphault/blog/language/soo-1.html soo > many soggy carpets.
+
+So, summarily, <i>Cixar</i> is a loosely governed alliance of Cix developers.
+

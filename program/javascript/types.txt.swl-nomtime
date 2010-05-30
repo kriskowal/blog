@@ -1,0 +1,307 @@
+1>Using and Creating Centauren Types
+
+:>
+	<table width="300" align="right" class="aside" style="margin-left: 10px; margin-bottom: 10px; margin-right: -5px;">
+		<tr><td><img src="/~kris.kowal/bdoc/program/javascript/unisus.png" alt="The Unisus"/></td></tr>
+		<tr><td>
+            Chiron's type system permits mixing.
+        </td></tr>
+	</table>
+/>
+
+Chiron's type system provides the major tenets of object oriented programming:
+*>
+    encapsulation
+    inheritance
+    polymorphism
+/>
+
+In addition to the classics, Chiron's type system provides mixins, orthogonality with factory methods, callable objects, and a closed syntax for declarations.  Also, parselmouthes will find themselves at home since the system is closely modeled, in terms of nomenclature and algorithms, on Python's new type system.  
+
+Mixins are a programming pattern where the developer creates types to fit a task by mixing a set of base types.  For example, an API might provide a <tt>MythicalBeast</tt> base type and various mixable types for concocting special versions of the <tt>MythicalBeast</tt>, like <tt>FireBreathing</tt>, <tt>Winged</tt>, <tt>Slippery</tt>, and <tt>OfDoom</tt>.  So, if the user needed a winged mythical beast of doom, they can create an anonymous type that mixes those types and then immediately instantiate it.  Just to whet your palette before the epic explanation, here's a peek at how this might look:
+
+">
+ var beast = type([Winged, MythicalBeast, OfDoom], {})();
+/>
+
+Chiron types are merely functions that return new instances.  This means that a factory method can stand in for a Chiron type object in any algorithm.  This also means that Chiron types can stand in for any function.  Chiron types do not make use of Javascript's <tt>new</tt> keyword.
+
+There are several code styles for creating types in native Javascript.  Let's call them "prototype augmentation", "constructor augmentation".  Chiron provides a closed form syntax for type declarations like "constructor augmentation".
+
+Here's an example of prototype augmentation:
+">
+ var Horse = function () {};
+ Horse.prototype.attack = function (victim) {};
+ var Unicorn = function () {};
+ Unicorn.prototype = new Horse();
+ Unicorn.prototype.impale = function (victim) {};
+/>
+
+Without getting too far into the irrelevant details of Prototype Oriented programming, your type is a constructor function.  When you say <tt>new</tt> before a constructor function call, Javascript makes a copy of your function's prototype object, calls your constructor with that copy as its context object and your arguments, then returns the context object.  When you don't say <tt>new</tt>, Javascript just calls your constructor function with the global context object, often a meaningless operation.  Also, Javascript can detect whether your object inherits another object by climbing your <tt>prototype</tt> chain.
+
+With prototype augmentation, the programmer can call functions of parent types.  Your algorithms have to know their parent type by name.
+">
+ Unicorn.prototype.attack = function (victim) {
+  this.impale(victim);
+  Horse.attack.call(this, victim);
+ };
+/>
+
+Calling your parent types by name and the one dimensional chain of prototypes preclude mixins.  Also this "open" syntax for declaration diminishes readability.  A popular solution of some Javascript libraries is the use of a function that adds the members of another object to the prototype.  Let's call this "closed prototype augmentation".
+">
+ var Unicorn = function () {};
+ Unicorn.prototype = new Horse();
+ update(Unicorn.prototype, {
+  attack: function (victim) {},
+  impale: function (victim) {} /* no trailing comma, HAH! */
+ });
+/>
+
+Developers can also use this <tt>update</tt> function to "implement" interfaces, although Javascript's <tt>instanceof</tt> operator will probably not work as you would expect.
+">
+ update(Horse.prototype, new Ridable());
+/>
+
+On the flip side here's an example of constructor augmentation:
+">
+ var Horse = function () {
+  this.attack = function (victim) {};
+ };
+ var Unicorn = function () {
+  this.attack = function (victim) {this.impale(victim)};
+  this.impale = function (victim) {};
+ };
+ Unicorn.prototype = new Horse();
+/>
+
+One advantage of this system is that you can provide common, private data inside your constructor's closure:
+">
+ var Horse = function (color) {
+  this.getColor = function () {return color;};
+  this.setColor = function (colorValue) {color = colorValue;};
+ };
+/>
+
+The disadvantage of this system is that you cannot call the members of parent types since they're not inside the prototype.
+
+Of course, these techniques can be mixed to various ends, but variety broods confusion and the average programmer must assume that all types provide the least functionality of all of these systems.  That is, not knowing the details of how you implemented a type, the developer should not assume that <tt>instanceof</tt> works properly or that they can access the functions you implement using your prototype.
+
+Another disadvantage of all of these systems is that you cannot trickle arguments from one constructor down to the constructors of your base classes.  Imagine a situation where you might want to pass the height of your unicorn to the horse constructor function.  This is particularly disabling in "constructor form" since your derived types cannot pass arguments into your constructor.  In the prototype system, your derived types share a common <i>instance</i> as their base type, so the base type's member data must be applicable to all instances of derived types.
+
+
+4>Implementing and Using
+
+With all of these considerations in the background, let's look at Chiron types.  Developers can easily migrate their "constructor argumentation" and "closed prototype augmentation" type declarations to Chiron's type system by decorating their existing <tt>Function</tt> or <tt>Object</tt> with Chiron's <tt>type</tt> function.
+
+(Aside: "decoration" is a programming pattern where you use a "higher order function" to decorate an existing function.  The decorator accepts your existing function and returns a new function that implements at least the same interface and provides additional functionality.  "higher order functions" are merely functions that return a function or accept functions as arguments).
+
+<a href="https://cixar.com/svns/javascript"><tt>base.js</tt></a> provides Chiron's <tt>type</tt> function.  Type accepts an optional <tt>Array</tt> or <tt>List</tt> of base types and either a constructor <tt>Function</tt> or a "prototype" <tt>Object</tt>.  By default, your base type list is empty, but all types implicitly extend Chiron's <tt>Base</tt> type.
+
+From "closed prototype" form:
+">
+ this.Horse = type({
+  attack: function (victim) {}
+ });
+ this.Unicorn = type([Horse], {
+  attack: function (victim) {this.impale(victim)},
+  impale: function (victim) {},
+ });
+/>
+
+From "constructor" form:
+
+">
+ this.Horse = type(function () {
+  this.attack = function (victim) {};
+ }); 
+ this.Unicorn = type([Horse], function () {
+  this.attack = function (victim) {this.impale(victim);};
+  this.impale = function (victim) {};
+ }):
+/>
+
+Unfortunately, your constructor arguments will no longer go to your constructor function, so some refactoring is in order.  Here's the algorithm for Chiron type instantiation:
+#>
+ Construct an empty instance object.
+ Starting from the bottom of your method resolution order (<tt>Base</tt>), call each base type's constructor function on the instance object.  After each constructor runs, file a reference copy of the methods so that derived classes can access the members of their super-types.
+ Call the topmost <tt>init</tt> function of the instance object.  If no derived types provide an <tt>init</tt> function, the duty falls to the <tt>Base</tt> type's <tt>init</tt>, which does nothing.  Using <tt>getSuper</tt>, an overridden implementation of <tt>init</tt> can reliably call the <tt>init</tt> function of its super type, trickling arguments down.
+/>
+
+In abstract, <tt>constructor</tt> functions get called from the bottom of up, and <tt>init</tt> gets called from the top down.  Every instance has its own unique construction of each of its base types, rather than sharing them among all derived type instances.
+
+The type system provides a <tt>getSuper</tt> method to all instances.  <tt>getSuper</tt> gets the interface that existed before a given type's construction.  This is useful for calling methods that a derived type overrides.
+
+">
+ this.Horse = type(function () {
+  var height;
+  this.init = function (heightValue) {
+   height = heightValue;
+  };
+  this.attack = function (victim) {
+  };
+ });
+
+ this.Unicorn = type([Horse], function () {
+  var hornLength;
+  this.init = function (hornLengthValue, heightValue) {
+   hornLength = hornLengthValue;
+   this.getSuper(Unicorn).init(heightValue);
+  };
+  this.attack = function (victim) {
+   this.impale(victim);
+   this.getSuper(Unicorn).attack(victim);
+  };
+  this.impale = function (victim) {
+  };
+ });
+/>
+
+Or more generically just passing all remaining arguments to the super type initializer:
+">
+ this.Unicorn = type([Horse], function () {
+  this.init = function (hornLengthValue) {
+   this.getSuper(Unicorn).init.apply(this, arraySlice(arguments, 1));
+  };
+ });
+/>
+
+Instances are also callable.  If a type provides a <tt>call</tt> member function, calling an object will defer to the provided function.
+
+">
+ this.Unicorner = type(function () {
+  this.call = function () {
+   return Unicorn();
+  };
+ });
+ var unicorner = Unicorner();
+ var unicorn = unicorner();
+/>
+
+This is just another fantastic tool for blurring the distinction among factory methods, types, and instances.
+
+
+4>The API
+
+So, for reference, here's the interface of a Chiron type object:
+*>
+    <tt>getName</tt> returns the name of the type, usually the variable name you assigned the type to, or <tt>Anonymous</tt> followed by a number.
+    <tt>getFullName</tt> returns the fully qualified name of the type, which includes the URL of the module and the name of the name of the type as an anchor on the URL.
+    <tt>getModule</tt> returns the <tt>Module</tt> that contains the type.
+    <tt>getModuleContext</tt> returns the context of the module that contains the type.
+    <tt>isType</tt> returns whether this type contains a given type anywhere in its method resolution order.  That is to say that instances of this type implement the given type.
+    <tt>getBases</tt> returns a <tt>List</tt> of this type's immediate base types.
+    <tt>getMro</tt> returns a <tt>List</tt> of all of this type's base types in precedence order.
+    <tt>getConstruct</tt> returns the constructor function for instances of this type.  This function gets called with no arguments on new instances of this type after all of its base types constructors have been called.
+    <tt>string</tt> and <tt>repr</tt> return string representations of the type of the form "<tt>&lt;TypeName type&gt;</tt>".
+/>
+
+All types implement <tt>Base</tt> at the bottom of their inheritance hierarchy.  <tt>Base</tt> is analogous to Java's <tt>Object</tt> and Python's <tt>object</tt>.  <tt>Base</tt> has the following interface:
+
+For starters, <tt>Base</tt> implements attribute manipulation wrappers.  Unlike their analogs in Python, these should not be overridden unless your use them as the exclusive interface for your members.  It's a pity, but observing member manipulation just isn't going to happen in Javascript in a cross-platform way, so you ought to find other ways to create proxy objects.
+*>
+    <tt>hasAttr</tt>
+    <tt>getAttr</tt>
+    <tt>setAttr</tt>
+    <tt>delAttr</tt>
+/>
+
+From there, <tt>Base</tt> also implements:
+*>
+    <tt>init</tt> is a default initializer that does nothing save to guarantee that <tt>getSuper(DerivedType).init()</tt> will always work.
+    <tt>isInstance</tt> returns whether your type implements or extends a given type.
+    <tt>getSuper</tt> returns the interface of an instance that existed before a given base type's constructor ran.
+    <tt>as</tt> returns the interface of an instance that existed after a given base type's constructor ran.
+    <tt>getTypeName</tt> returns the name of the type.
+    <tt>getTypeFullName</tt> returns the full name of the type.
+    <tt>dir</tt> returns a sorted list of all member names of the type.
+    <tt>vars</tt> returns a sorted dictionary of all the members of the type.
+    <tt>repr</tt> returns a string representation of the type of the form <tt>&lt;TypeName instance&gt;</tt>.
+    <tt>hash</tt> returns a long non-unique string sequence of randomly generated digits to serve as a hash value for the object, since the Object's unique location in memory is unavailable to Javascript.
+    <tt>eq</tt> provides a default equality comparison that returns whether the given object is the same object as itself.
+    <tt>ne</tt> provides a default non-equality comparison that returns the logical negation of <tt>eq</tt>
+    <tt>string</tt> provides a default string representation implementation that defers to <tt>repr</tt>
+    <tt>copy</tt> provides a default copy implementation that creates a new copy of the object's type giving itself as an argument.  If a type doesn't provide a copying constructor, it should override this method.
+/>
+
+<tt>base.js</tt> also provides global functions for operating on Chiron types and native Javascript types interchangeably.
+
+*>
+    <tt>hasAttr</tt>
+    <tt>getAttr</tt>
+    <tt>setAttr</tt>
+    <tt>delAttr</tt>
+    <tt>isInstance</tt>
+    <tt>getType</tt>
+    <tt>getTypeName</tt>
+    <tt>getTypeFullName</tt>
+    <tt>as</tt>
+    <tt>dir</tt>
+    <tt>vars</tt>
+    <tt>repr</tt>
+    <tt>hash</tt>
+/>
+
+
+4>About the Method Resolution Order
+
+Chiron's type system is a compromise between multiple inheritance and single inheritance.  The type system does not share the peril of C++'s virtual and static inheritance schemes nor its ambiguity of inheritance orders.  Chiron types have a "monotonic, C3 method resolution order", cribbed straight out of < http://www.python.org/download/releases/2.3/mro/ "Python's new style classes" >.  This means that, while a type can have multiple base-types and an inheritance tree, each type's ancestry gets flattened to a linear list where each type strictly precedes all those that follow.
+
+When you declare a type, you provide an <tt>Array</tt> or <tt>List</tt> of base types.  This declaration guarantees two things about your type and all types that inherit it.
+#>
+    Members of your type will always precede members of these, underlying types.  In no derived class will members ever precede you.  Ever.
+    In all derived types, the base types will have the same order of precedence.  This means that when you get the super type of a Pegasus, methods implemented in Horse will always precede implementations in Base.
+/>
+
+Consider the inheritance tree of the <tt>Unisus</tt>, part <tt>Unicorn</tt>, part <tt>Pegasus</tt>.
+
+<center><img src="/~kris.kowal/bdoc/program/javascript/types.png" width="500" height="500" alt="Unisus Inheritance Hierarchy"/></center>
+
+The method resolution order of each type is:
+*>
+    Base: [Base]
+    Horse: [Horse, Base]
+    Pegasus: [Pegasus, Horse, Base]
+    Unicorn: [Unicorn, Horse, Base]
+    Unisus: [Unicorn, Pegasus, Horse, Base]
+/>
+
+The first thing to note is that the <tt>Unicorn</tt> and <tt>Pegasus</tt> do not have distinct <tt>Horse</tt> parents.  If unicorns have methods that defer to their equine nature, they must first defer to the pegasus side.  This is possibly a consideration that the <tt>Unicorn</tt> author did not make, however it is one that can be safely made if the <tt>Pegasus</tt> accepts the same interface as <tt>Horse</tt> and defers to the horse implementation if applicable.  For example, <tt>Horse</tt> might implement <tt>travel</tt>, which would defer to <tt>walk</tt> by default.  <tt>Pegasus</tt> might opt to fly instead, and thus the <tt>Unicorn</tt> implementation of <tt>travel</tt> might do some preparatory dancing then defer to the pegasus <tt>travel</tt> implementation, and in turn, <tt>fly</tt>.
+
+How does one calculate method resolution order?  For one, tediously, but as long as you keep those two simple assumptions in your head, you really won't ever need to.  That being said, here's how to calculate the <tt>Unisus</tt> MRO.
+
+First, Base's MRO is trivial: [Base].  Also, Horse's MRO is merely its base type list, [Horse, Base].
+
+Pegasus and Unicorn are also straightforward.  You start with just the type itself:
+*>
+    Pegasus: [Pegasus]
+    Unicorn: [Pegasus]
+/>
+Then you iteratively expand each of the type with its list of bases.
+*>
+    Pegasus: [(Pegasus, Horse)]
+    Unicorn: [(Unicorn, Horse)]
+/>
+*>
+    Pegasus: [Pegasus, (Horse, Base)]
+    Unicorn: [Unicorn, (Horse, Base)]
+/>
+
+For the <tt>Unisus</tt>, we run into a case where expanding base types reveals multiple occurrences of the same bases.
+*>
+    Unisus
+    (Unisus, Unicorn, Pegasus)
+    Unisus, (Unicorn, Horse, Base), (Pegasus, Horse, Base)
+/>
+In this problematic situation, we remove all but the last occurrence of each type.
+*>
+    Unisus, (Unicorn, <s>Horse</s>, <s>Base</s>), (Pegasus, Horse, Base)
+/>
+Leaving us with the Unisus MRO:
+*>
+    Unisus, Unicorn, Pegasus, Horse, Base
+/>
+
+This description of the MRO calculation process is not nearly as rigorous as the explanation of Python's implementation as linked above, nor really applicable to the design of the algorithm, but should give you as a developer an idea of who your base types are, and who they might become when someone else comes along and derives from your types.
+
+Thus ends a lengthly yet still all too dense explanation of Centauren types.
+

@@ -1,0 +1,216 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-8953926900492892412</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;!--  vim:co=80:wrap:lbr: --&gt;
+&lt;p&gt;The purpose of this document is to propose a contract between a collection of JavaScript module loaders and modules.  The specification describes the environment that module loader implementations provide, and the environment that modules may depend upon.  In particular, compliant module systems:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;map one file to one module (while leaving room for implementation-specific multi-module bundling for website performance),&lt;/li&gt;
+	&lt;li&gt;cache singleton module objects before executing the corresponding module file,&lt;/li&gt;
+	&lt;li&gt;execute modules with a feature-rich context,&lt;/li&gt;
+	&lt;li&gt;resolve module URLs relative to a module path, and&lt;/li&gt;
+	&lt;li&gt;conform to a domain-name-based site-package naming convention and leave a name-space for a centrally managed standard library.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The specification is intended to be suitable for client- and server-side JavaScript module loader implementations.&lt;/p&gt;
+&lt;p&gt;The specification is intended to provide insights and an easy migration path to future versions of JavaScript.&lt;/p&gt;
+&lt;p&gt;The specification is intended to narrow the domain in which JavaScript modules can universally depend to maximize portability.&lt;/p&gt;
+&lt;p&gt;The specification encourages modules to adhere to a strict subset of the JavaScript environment in which they may be loaded.  In spirit, this is a theoretical version of the JavaScript language that provides the intersection of behaviors provided by Class-A browsers and server-side run-times including Rhino, plus this system for loading modules.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Module Execution Context
+&lt;/h2&gt;
+&lt;p&gt;The singleton &lt;tt&gt;module&lt;/tt&gt; object MUST be declared and cached BEFORE the corresponding module file is executed.  The module file MUST only be executed ONCE for the duration of a page-view or JavaScript program.&lt;/p&gt;
+&lt;p&gt;In a module file's execution context, the context object, represented by &lt;tt&gt;this&lt;/tt&gt;, MUST be the &lt;tt&gt;module&lt;/tt&gt; object.&lt;/p&gt;
+&lt;p&gt;The scope chain, from global to local, of a module file's execution context MUST consist of:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;builtins&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;moduleScope&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;module&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;i&gt;&amp;lt;anonymous&amp;gt;&lt;/i&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;builtins&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;Rules for module systems:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;The &lt;tt&gt;builtins&lt;/tt&gt; object MAY be frozen.&lt;/li&gt;
+	&lt;li&gt;All objects in the transitive closure of &lt;tt&gt;builtins&lt;/tt&gt; on item selection MAY be frozen.&lt;/li&gt;
+	&lt;li&gt;The &lt;tt&gt;builtins&lt;/tt&gt; object MAY contain more values than specified.&lt;/li&gt;
+	&lt;li&gt;The &lt;tt&gt;builtins&lt;/tt&gt; object MUST include:&lt;/li&gt;
+
+	&lt;ul&gt;
+		&lt;li&gt;&lt;tt&gt;String&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;Number&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;Boolean&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;Object&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;Array&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;Date&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;RegExp&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;Error&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;EvalError&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;RangeError&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;ReferenceError&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;SyntaxError&lt;/tt&gt;&lt;/li&gt;
+		&lt;li&gt;&lt;tt&gt;TypeError&lt;/tt&gt;&lt;/li&gt;
+	&lt;/ul&gt;
+	&lt;li&gt;The module loader MAY enforce these invariants at any time.  In some environments, verifying these invariants will not be possible or pragmatic.&lt;/li&gt;
+	&lt;li&gt;All objects in &lt;tt&gt;builtins&lt;/tt&gt; MUST conform to the JavaScript subset described in the introduction: one that consists of the intersection of behaviors of the respective objects in all Grade-A browsers and server-side JavaScript environments.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Rules for modules:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;Modules MUST NOT write items to the &lt;tt&gt;builtins&lt;/tt&gt; object.&lt;/li&gt;
+	&lt;li&gt;Modules MUST NOT modify any object in the transitive closure through references on the &lt;tt&gt;builtins&lt;/tt&gt; object.&lt;/li&gt;
+	&lt;li&gt;Modules MUST NOT access any items in the &lt;tt&gt;builtins&lt;/tt&gt; object not herein specified.&lt;/li&gt;
+	&lt;li&gt;Modules MUST NOT use non-standard features provided by &lt;tt&gt;builtins&lt;/tt&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;moduleScope&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;The &lt;tt&gt;moduleScope&lt;/tt&gt; is a module's private name-space for module loader functions and imported values.&lt;/p&gt;
+&lt;p&gt;The &lt;tt&gt;moduleScope&lt;/tt&gt; MUST provide:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;builtins&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;module&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;moduleUrl&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;moduleRootUrl&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;require&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;include&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;foreignModuleBind&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;log&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The &lt;tt&gt;moduleScope&lt;/tt&gt; MAY provide:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;register&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;publish&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Modules MAY augment the &lt;tt&gt;moduleScope&lt;/tt&gt; with additional items.&lt;/p&gt;
+&lt;p&gt;Modules MUST NOT overwrite the items specified here.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Module Loading
+&lt;/h2&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;require(&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;, &lt;/tt&gt;&lt;i&gt;[&amp;lt;structure&amp;gt;]&lt;/i&gt;&lt;tt&gt;)&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;The &lt;tt&gt;require&lt;/tt&gt; function returns an object with items from a foreign module.  The required module is referenced with a URL.  By default, all items from the foreign module are copied into the returned object.  The returned object MAY be frozen.  Modules MUST NOT modify the returned object.  If a &lt;tt&gt;structure&lt;/tt&gt; is provided, a subset of the items from the foreign module will be returned, the result of &lt;tt&gt;destructure(&lt;/tt&gt;&lt;i&gt;&amp;lt;module&amp;gt;&lt;/i&gt;&lt;tt&gt;, &lt;/tt&gt;&lt;i&gt;&amp;lt;structure&amp;gt;&lt;/i&gt;&lt;tt&gt;)&lt;/tt&gt;.  If a function in the foreign module was declared with the &lt;tt&gt;foreignModuleBind&lt;/tt&gt; decorator, the corresponding item in the returned object is the result of &lt;i&gt;&amp;lt;foreignModule&amp;gt;&lt;/i&gt;&lt;tt&gt;.moduleScope.moduleBind(&lt;/tt&gt;&lt;i&gt;&amp;lt;name&amp;gt;&lt;/i&gt;&lt;tt&gt;, &lt;/tt&gt;&lt;i&gt;&amp;lt;value&amp;gt;&lt;/i&gt;&lt;tt&gt;)&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;If the URL begins with a dot, ("."), the fully qualified URL for the requested module is resolved relative to the fully qualified URL of the current module.  This would be the result of &lt;tt&gt;urlJoin(moduleRootUrl, moduleUrl, foreignModuleUrl)&lt;/tt&gt;.  Otherwise the fully qualified URL is &lt;tt&gt;urlJoin(moduleRootUrl, foreignModuleUrl)&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;Regarding module file names:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;Directory components and file names in modules MUST be in &lt;tt&gt;camelCase&lt;/tt&gt;.&lt;/li&gt;
+	&lt;li&gt;Modules MUST have a ".js" extension if they are provided by files.&lt;/li&gt;
+	&lt;li&gt;Modules MUST not have an extension if they are provided by the module loader but are not backed by real files.  This might include a "window" module in a particular browser implementation.&lt;/li&gt;
+	&lt;li&gt;The module root is reserved for a cross-browser JavaScript standard library.&lt;/li&gt;
+	&lt;li&gt;Modules provided by entities other than the standard library MUST exist in a subdirectory of the module root corresponding to a domain name controlled by the author, or a subdirectory thereof.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Module authors are encouraged to use module relative URLs to increase the mobility of entire directory trees of modules.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;include(&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;, &lt;/tt&gt;&lt;i&gt;[&amp;lt;structure&amp;gt;]&lt;/i&gt;&lt;tt&gt;)&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;The &lt;tt&gt;include&lt;/tt&gt; function defers to &lt;tt&gt;require&lt;/tt&gt;, both its arguments and its return value.  However, &lt;tt&gt;include&lt;/tt&gt; also copies all of the items from the object returned by &lt;tt&gt;require&lt;/tt&gt; to the &lt;tt&gt;moduleScope&lt;/tt&gt; object.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;foreignModuleBind(&lt;/tt&gt;&lt;i&gt;&amp;lt;function&amp;gt;&lt;/i&gt;&lt;tt&gt;)&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;A function decorator that denotes that the module loader guarantees that, when the decorated function is called, it will receive the &lt;tt&gt;module&lt;/tt&gt; object for the module file in which it was called as its context object: &lt;tt&gt;this&lt;/tt&gt;.  &lt;tt&gt;foreignModuleBind&lt;/tt&gt; MAY return the same &lt;tt&gt;Function&lt;/tt&gt; it was passed.  The returned function MUST be usable in the module in which it was declared as if it were the function passed to &lt;tt&gt;foreingModuleBind&lt;/tt&gt;.  &lt;tt&gt;foreignModuleBind&lt;/tt&gt; MAY modify properties of the given &lt;tt&gt;Function&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+
+&lt;pre&gt;
+this.foo = foreignModuleBind(function () {
+	log("foo called from: " + this.moduleScope.moduleUrl);
+});&lt;/pre&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;destructure(&lt;/tt&gt;&lt;i&gt;&amp;lt;object&amp;gt;&lt;/i&gt;&lt;tt&gt;, &lt;/tt&gt;&lt;i&gt;&amp;lt;structure&amp;gt;&lt;/i&gt;&lt;tt&gt;)&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;For the purpose of this specification, the "destructure" function has the following semantics.  If the structure is an &lt;tt&gt;Array&lt;/tt&gt;, the returned &lt;tt&gt;Object&lt;/tt&gt; contains the items from the given &lt;i&gt;&amp;lt;object&amp;gt;&lt;/i&gt; corresponding to the keys provided in the given &lt;tt&gt;Array&lt;/tt&gt; structure.  If the structure is an &lt;tt&gt;Object&lt;/tt&gt;, the returned object contains items where each key corresponds to a value in the structure, and the value is a value from the object corresponding to the key in the structure.  For example:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;destructure({"a": 10, "b": 20}, ["a"]) == {"a": 10}&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;destructure({"a": 10, "b": 20}, {"a": "A"}) == {"A": 10}&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;module&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;The &lt;tt&gt;module&lt;/tt&gt; object is a module's public interface.  Adding items to the &lt;tt&gt;module&lt;/tt&gt; object makes them available for export to other module scopes.  To that end, the &lt;tt&gt;module&lt;/tt&gt; object is mutable.  The &lt;tt&gt;module&lt;/tt&gt; object MUST provide a &lt;tt&gt;moduleScope&lt;/tt&gt;.  Modules MAY augment the module object.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;moduleRootUrl&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;&lt;tt&gt;moduleRootUrl&lt;/tt&gt; is the fully qualified URL of the JavaScript site-packages directory: the module root.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;moduleUrl&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;&lt;tt&gt;moduleUrl&lt;/tt&gt; is the relative URL of the current module file relative to &lt;tt&gt;moduleRootUrl&lt;/tt&gt;.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;log(&lt;/tt&gt;&lt;i&gt;&amp;lt;message&amp;gt;&lt;/i&gt;&lt;tt&gt;, &lt;/tt&gt;&lt;i&gt;[&amp;lt;label&amp;gt;]&lt;/i&gt;)&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;&lt;tt&gt;log&lt;/tt&gt; is a simple console logging function.&lt;/p&gt;
+&lt;p&gt;The module loader MAY ignore calls to &lt;tt&gt;log&lt;/tt&gt;.  The module loader MAY ignore the label argument.&lt;/p&gt;
+&lt;p&gt;The optional label MAY be any string, and MUST be suitable for use as a CSS class-name (preferably lower-case delimited by hyphens) of which the following MAY be significant:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;info&lt;/li&gt;
+	&lt;li&gt;warn&lt;/li&gt;
+	&lt;li&gt;error&lt;/li&gt;
+	&lt;li&gt;module&lt;/li&gt;
+	&lt;li&gt;help&lt;/li&gt;
+	&lt;li&gt;pass&lt;/li&gt;
+	&lt;li&gt;fail&lt;/li&gt;
+&lt;/ul&gt;
+
+
+&lt;h2&gt;
+	Afterword: Browser Implementations
+&lt;/h2&gt;
+&lt;p&gt;This specification outlines the process of requiring modules from within other modules.  However, in a browser's global context, JavaScript execution blocks are not modules.  To that end, this specification does not require that the module loader be invoked in any particular fashion.  A particular implementation might hook an initial module to be loaded from within a script tag.  Another implementation might scan the DOM for script tags with an alternate language attribute and execute them as modules with the current page's URL as their module URL.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Afterword: Future ECMAScript &lt;tt&gt;import&lt;/tt&gt; semantics.
+&lt;/h2&gt;
+&lt;p&gt;A future version of the ECMAScript standard might specify new syntax and semantics for importing modules.  Current discussions about this feature trend toward having new syntax that "desugars" to native JavaScript.  To that end, I propose the following syntax and desugaring transformations in the context of this specification:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;import "&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;" as &lt;/tt&gt;&lt;i&gt;&amp;lt;moduleName&amp;gt;&lt;/i&gt;;&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;module.&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleName&amp;gt;&lt;/i&gt;&lt;tt&gt; = require("&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;");&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;from "&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;" import *;&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;include("&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;");&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;from "&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;" import &lt;/tt&gt;&lt;i&gt;&amp;lt;a&amp;gt;&lt;/i&gt;&lt;tt&gt;;&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;include("&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;", ["&lt;/tt&gt;&lt;i&gt;&amp;lt;a&amp;gt;&lt;/i&gt;&lt;tt&gt;"]);&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;from "&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;" import &lt;/tt&gt;&lt;i&gt;&amp;lt;a&amp;gt;&lt;/i&gt;&lt;tt&gt; as &lt;/tt&gt;&lt;i&gt;&amp;lt;a&amp;apos;&amp;gt;&lt;/i&gt;&lt;tt&gt;;&lt;/tt&gt;&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;include("&lt;/tt&gt;&lt;i&gt;&amp;lt;moduleUrl&amp;gt;&lt;/i&gt;&lt;tt&gt;", {"&lt;/tt&gt;&lt;i&gt;&amp;lt;a&amp;gt;&lt;/i&gt;&lt;tt&gt;": "&lt;/tt&gt;&lt;i&gt;&amp;lt;a&amp;apos;&amp;gt;&lt;/i&gt;&lt;tt&gt;"});&lt;/tt&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:59.107-07:00</ns0:updated><ns0:published>2008-09-04T03:28:00.001-07:00</ns0:published><ns0:title type="text">JavaScript Module Standard</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/8953926900492892412/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=8953926900492892412" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8953926900492892412" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8953926900492892412" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2008/09/javascript-module-standard_04.html" rel="alternate" title="JavaScript Module Standard" type="text/html" /></ns0:entry>

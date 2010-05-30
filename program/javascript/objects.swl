@@ -1,0 +1,50 @@
+1> Object: Container or Type
+
+JavaScript, in a vain attempt to make the language simpler, conflates the concerns of the Object system and the lookup-table.  "objects" in JavaScript serve as both instances of types and as key to value mappings, but only for string keys. Object-literals can be used as lookup tables, instances of types, or both at the same time. The "Object" constructor itself serves as both a lookup table base-type, and the base-type of all types.
+
+The principle advantage of using objects as types and as lookups is a reduction in syntax.  Many languages have two separate notations for dealing with properties and keys.  Keys get the brackets; properties get the dot notation.  But dot notation does not provide a facility for parameterized properties names.  The easy solution was to just use brackets for both properties and keys.
+
+">object[propertyName]
+
+Many other languages separate these concerns.  The principle advantage of separating these concerns is that a lookup-table object needs to have two key domains, that of its type and that of its contents.  When these domains are conflated, neither can express the full range of potential keys.  Their key-spaces collide.
+
+Furthermore, the domain of object properties <em>should</em> be more restricted than that of a lookup table.  In the former you want all keys to be valid symbols.  In the latter, you want keys to be any reference and any string.  Instead, Objects-used-as-lookups can only use <em>some</em> Strings: those that do not collide with methods, unless you're <em>really</em> careful.
+
+Which brings me to my thesis. My point is not that JavaScript should be fixed; there is no technically viable solution to that problem, and using another language isn't always a solution. My point is that we have to be <em>really</em> careful.  Objects can be safely used as lookup tables for the full range of at least Strings.  In order to do so, you have to avoid using them as instances.  That means you can't call their function properties (member functions).  To do so would be to assume that the member function name is an invalid entry in the lookup key-space.  You cannot enforce that restriction without peril.
+
+So, to use an Object as a lookup table, you must only use the "owned" properties of the "Object".  By convention, any function in its prototype chain must be treated as a method of the type, not contents of the lookup table.  This distinction is useful in determining whether a property is a member function or contents of a lookup type.
+
+<strong>has</strong>
+">return Object.prototype.hasOwnProperty.call(mapping, key)
+
+<strong>get</strong>
+">
+ if (Object.prototype.hasOwnProperty.call(mapping, key)
+  return mapping[key];
+/>
+
+<strong>set</strong>
+">
+ mapping[key] = value;
+/>
+
+<strong>getset</strong>
+">
+ if (!Object.prototype.hasOwnProperty.call(mapping, key)
+  mapping[key] = value;
+ return mapping[key];
+/>
+
+<strong>del</strong>
+">
+ delete mapping[key];
+/>
+
+The complete and hideous <code>Object.prototype.hasOwnProperty.call(mapping, key)</code> instead of the polymorphic <code>mapping.hasOwnProperty(mapping, key)</code> is draconian but enables "hasOwnProperty" to be a key in the container space.  Some would argue that this particular value is not worth the effort, and that a polymorphic "hasOwnProperty" is useful in creating Object-as-lookup-and-as-subtypes.  If you can validate your key space, it might be an optimization you can use.  However, if you are writing generic code to operate on objects that may have been crafted by suspect users, this is not a luxury you can afford.  If you want polymorphic types, use a polymorphic type.
+
+To that end, I propose that you make or find a polymorphic collection type.  These are easy to define.  We do not have the luxury of creating hash tables in JavaScript since there is no good hashing solution for arbitrary objects, but we do have "toString".  We can use "toString" as a hash function and arrays as collision buckets.  Then, we can wrap the "internal" Object of Arrays with polymorphic "get", "set", "has", "getset", "del", "put", and "len" property functions in the type name space.  <a href="http://github.com/kriskowal/chiron/blob/master/lib/chiron/set.js#L82-96">Chiron</a> defines sets and dictionaries in this fashion.
+
+Narwhal has a <a href="http://github.com/280north/narwhal/blob/master/lib/util.js#L334-399"><tt>util</tt></a> module that exports top-level functions by those names that will operate, via their first argument, on <em>either</em> objects-as-mappings or objects-as-instances generically.  It distinguishes name-as-key from name-as-method by checking whether it is an owned property.  So, an object literal that happens to be tracking whether it has encountered the "get" method name in a collection of instances would own a "get" property, but an instance that has a "get" method that mediates some crazy internal storage mechanism would not own its "get" property, it would be in the prototype chain.
+
+To this end, I also propose that any Crockford-style constructor that returns an object-as-instance should use the new ECMAScript 5 "Object.create(self)" <a href="http://github.com/280north/narwhal/blob/1f10254fa2df9f2736ecf922b79eab450eefca38/engines/rhino/lib/io-engine.js#L194-196">idiom</a> so that its member functions can be distinguished from object-literal contents.
+

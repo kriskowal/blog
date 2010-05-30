@@ -1,0 +1,73 @@
+1>Partial Application in JavaScript
+
+< http://ejohn.org/ "John Resig" > < http://ejohn.org/blog/javascript-method-overloading/ "recently blogged" > about an <tt>addMethod</tt> function that permits a JavaScript function to defer to any number of implementations that differ only by the number of arguments that they accept.   However, the salient point of the blog was that each JavaScript function has a <tt>length</tt> attribute that corresponds to the number of arguments that it expects based on its declaration.  This intrigued me.  Here's an implementation of a generalized < http://en.wikipedia.org/wiki/Currying currying > or < http://lambda-the-ultimate.org/node/2266 "partial application" > < http://wiki.python.org/moin/PythonDecorators decorator >.  (On a side note, I haven't sorted out in my head whether and how the distinction between partial application and generalized currying is relevant in JavaScript.  Either way, it's handy.)  < http://cixar.com/~kris.kowal/javascript/trunk/run.html?test/base/partial.js Enjoy > and < https://cixar.com/tracs/javascript/browser/trunk/base.js?rev=216#L4606 Enjoy >.
+
+:>
+<style type="text/css">
+.Identifier { color: red; }
+.Statement { color: blue; }
+pre { color: #000000;}
+.lnr { color: gray; }
+.Comment { color: #007777; }
+.Type { color: blue; }
+</style>
+<pre>
+<span class="lnr"> 1</span>
+<span class="lnr"> 2</span>  <span class="Comment">/*** partial</span>
+<span class="lnr"> 3</span>  <span class="Comment">    returns a function that supports partial application based</span>
+<span class="lnr"> 4</span>  <span class="Comment">    on the number of arguments it accepts.  If additional</span>
+<span class="lnr"> 5</span>  <span class="Comment">    arguments are applied to ``partial`` those are partially</span>
+<span class="lnr"> 6</span>  <span class="Comment">    applied to the function.</span>
+<span class="lnr"> 7</span>
+<span class="lnr"> 8</span>  <span class="Comment">    ``partial(function, [argument, [argument, [...]]]) -&gt; function``</span>
+<span class="lnr"> 9</span>  <span class="Comment">*/</span>
+<span class="lnr">10</span>  <span class="Comment">/*test</span>
+<span class="lnr">11</span>  <span class="Comment">    var f = partial(function (a, b, c) {return a + b + c});</span>
+<span class="lnr">12</span>  <span class="Comment">    assertEq(f.partialLength, 3, 'partial length');</span>
+<span class="lnr">13</span>  <span class="Comment">    assertEq(f(1).partialLength, 2, 'partial length');</span>
+<span class="lnr">14</span>  <span class="Comment">    assertEq(f(1)(2).partialLength, 1, 'partial length');</span>
+<span class="lnr">15</span>  <span class="Comment">    assertEq(f(1, 2).partialLength, 1, 'partial length');</span>
+<span class="lnr">16</span>
+<span class="lnr">17</span>  <span class="Comment">    assertEq(f(1)(2, 3), 6, 'full application');</span>
+<span class="lnr">18</span>  <span class="Comment">    assertEq(f(1)(2)(3), 6, 'full application');</span>
+<span class="lnr">19</span>  <span class="Comment">    assertEq(f(1, 2)(3), 6, 'full application');</span>
+<span class="lnr">20</span>  <span class="Comment">    assertEq(f(1, 2, 3), 6, 'full application');</span>
+<span class="lnr">21</span>
+<span class="lnr">22</span>  <span class="Comment">    assertEq(partial(f).partialLength, 3, 'nested partial length');</span>
+<span class="lnr">23</span>  <span class="Comment">    assertEq(partial(f, 1).partialLength, 2, 'nested partial length');</span>
+<span class="lnr">24</span>  <span class="Comment">    assertEq(partial(f)(1).partialLength, 2, 'nested partial length');</span>
+<span class="lnr">25</span>  <span class="Comment">    assertEq(partial(f, 1, 2).partialLength, 1, 'nested partial length');</span>
+<span class="lnr">26</span>  <span class="Comment">    assertEq(partial(f, 1)(2).partialLength, 1, 'nested partial length');</span>
+<span class="lnr">27</span>  <span class="Comment">    assertEq(partial(f)(1, 2).partialLength, 1, 'nested partial length');</span>
+<span class="lnr">28</span>
+<span class="lnr">29</span>  <span class="Comment">    assertEq(partial(f, 1, 2, 3), 6, 'nested full application');</span>
+<span class="lnr">30</span>  <span class="Comment">    assertEq(partial(f)(1, 2, 3), 6, 'nested full application');</span>
+<span class="lnr">31</span>  <span class="Comment">    assertEq(partial(f)(1)(2, 3), 6, 'nested full application');</span>
+<span class="lnr">32</span>  <span class="Comment">    assertEq(partial(f)(1)(2)(3), 6, 'nested full application');</span>
+<span class="lnr">33</span>  <span class="Comment">    assertEq(partial(f)(1)(2)(3), 6, 'nested full application');</span>
+<span class="lnr">34</span>
+<span class="lnr">35</span>  <span class="Comment">    assertEq(partial(partial(f))(1, 2, 3), 6, 'recursively nested partials');</span>
+<span class="lnr">36</span>
+<span class="lnr">37</span>  <span class="Comment">*/</span>
+<span class="lnr">38</span>  <span class="Type">this</span>.partial = <span class="Identifier">function</span> () <span class="Identifier">{</span>
+<span class="lnr">39</span>      <span class="Type">var</span> outerArgs = array(arguments);
+<span class="lnr">40</span>      <span class="Type">var</span> functor = outerArgs.shift();
+<span class="lnr">41</span>      <span class="Statement">if</span> (!functor.partialLength)
+<span class="lnr">42</span>          functor.partialLength = functor.length;
+<span class="lnr">43</span>      <span class="Type">var</span> result = <span class="Identifier">function</span> () <span class="Identifier">{</span>
+<span class="lnr">44</span>          <span class="Type">var</span> args = outerArgs.concat(array(arguments));
+<span class="lnr">45</span>          <span class="Statement">if</span> (args.length &gt;= functor.partialLength) <span class="Identifier">{</span>
+<span class="lnr">46</span>              <span class="Statement">return</span> functor.apply(<span class="Type">this</span>, args);
+<span class="lnr">47</span>          <span class="Identifier">}</span> <span class="Statement">else</span> <span class="Identifier">{</span>
+<span class="lnr">48</span>              <span class="Statement">return</span> partial.apply(<span class="Type">this</span>, [functor].concat(args));
+<span class="lnr">49</span>          <span class="Identifier">}</span>
+<span class="lnr">50</span>      <span class="Identifier">}</span>;
+<span class="lnr">51</span>      result.partialLength = functor.partialLength - outerArgs.length;
+<span class="lnr">52</span>      <span class="Statement">if</span> (!result.partialLength)
+<span class="lnr">53</span>          <span class="Statement">return</span> result();
+<span class="lnr">54</span>      <span class="Statement">return</span> result;
+<span class="lnr">55</span>  <span class="Identifier">}</span>;
+<span class="lnr">56</span>
+</pre>
+/>
+

@@ -1,0 +1,6 @@
+1>modules.js
+
+We've posted < http://modulesjs.com modulesjs.com > this evening to proliferate what could be the most important piece of code I've ever written, <tt>modules.js</tt>.  This JavaScript is the core of my Chiron JavaScript library project for the Tale game user interface, but could stand alone as the core of any number of JavaScript library projects.  Every popular JavaScript library could benefit from a module system that handles dependencies and isolates name spaces like Python or Ruby.  Read the < http://modulesjs.com/tutorial.html tutorial > and look over the < http://cixar.com/tracs/javascript/browser/trunk/modules.js code >.  Find me on an instant messenger or my face in the big blue box or send me an email and tell me what you think.
+
+Thanks go out to Ryan Witt for managing the server and domain, my sister Kathleen Kowal for the graphic design, Ryan Paul, Ryan Ernst, and Mike Stone for proofreading and particularly to Ryan Paul for letting me expound at him nigh daily for the last decade.
+

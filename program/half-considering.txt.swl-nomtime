@@ -1,0 +1,42 @@
+1> Half Considering
+
+My lesser half is considering writing a new Javascript.  I've been following the progress on new Javascripts, and from my perspective, the implementors are taking the language in a direction I don't want to follow.
+
+In my mind, Javascript's faults are the subtleties in its ostensibly simple veneer.   For example, using the <tt>Object</tt> as both a base type and an associative array hinders orthogonality, and using member selection as an alias for item indexing further compounds the problem.  Prototype oriented programming causes all sorts of unexpected complexities: for example, all objects derived from a given <i>instance</i> will ascribe to Python's "borg" pattern, but shallow instance variables aren't shared with the hive mind, only deep data structures are shared.  I think we need a new Javascript, one unhindered by backwards compatibility.
+
+Recent developments in a positive direction:
+*>
+    generators
+    list and generator comprehension
+/>
+
+Recent digressions that need not be pursued:
+*>
+    namespaces
+    optional static typing
+/>
+
+Here's a small list of requirements:
+*>
+    a simple module system
+    a more comprehensive library
+    separate <tt>Object</tt> and <tt>Dict</tt> types
+    no prototype oriented type system
+    one real, object oriented type system
+    *>
+        preferably closures are objects
+        methods are implicitly bound
+        no explicit context object <tt>this</tt>
+        operator overload, including member selection
+        type coercion
+    />
+    separate types for integers and floating and fixed precision numbers
+    unified garbage collection between the DOM and JS
+/>
+
+Wouldn't be a waste of time:
+*>
+    continuations
+    a common runtime and foreign function interface
+/>
+

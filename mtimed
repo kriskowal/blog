@@ -1,0 +1,2 @@
+#!/bin/bash
+find . -name '*.txt' | while read file; do [[ -f $file.swl.mdate ]] && echo $file; done

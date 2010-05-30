@@ -1,0 +1,57 @@
+1>Javascript Libraries
+
+I've been poring over Javascript libraries lately, trying to ascertain the extent of their features, how much implementation overlap there is among them, and which ones implement certain features best.  The idea is that I'm going to integrate the best tidbits into Cixar Javascript.  I'm reading:
+*>
+    Yahoo's < http://developer.yahoo.com/yui/ YUI >,
+    < http://dojotoolkit.org/ Dojo >,
+    < http://www.prototypejs.org/ Prototype >,
+    < http://mootools.net/ Mootools >,
+    < http://mochikit.com/ Mochikit >, and
+    < http://script.aculo.us Scriptaculous >, plus outliers and extensions like
+    < http://www.flapjax-lang.org/ Flapjax >,
+    < http://www.mooshow.eatpixels.com/ Mooshow >,
+    < http://www.ibegin.com/ibox/ibox-test.html iBox >, and
+    < http://www.huddletogether.com/projects/lightbox/ Lightbox >.
+/>
+
+Please contact me if I need to add a library to my reading list.
+
+I've got some general impressions so far.  Dojo and Mochikit are by far the heaviest.  They're loaded with lots and lots of well tested unreadable undocumented components.  Dojo supports its own weight because it's the only Javascript library that has a module loader, albeit a module loader that loads modules into the global name-space.  YUI, Mootools, and Scriptaculous are comparatively higher quality but smaller and limited to their size by the lack of a good module system.  YUI is the best documented, having lots of Javadoc style comments.  Mootools, I think proves to be the highest quality code for the few things it does and does rather well.  Scriptaculous and its base library Prototype, spun off the Ruby on Rails project, both seem to work pretty well, but the code is criminally bad, showing lots of signs of having been designed by whim.  I get a very strong "the least that would work" vibe from it.
+
+Dojo's module system intrigued me because it loads modules synchronously with AJAX and Javascript's <tt>eval</tt>.  I've considered applying the same ideas for Cixar Javascript's module system.  However, the current Cixar Javascript module system puts the power of nomenclature into the hands of the module writer, not the hands of Kurremkarmerruk, the Wizard who knows and manages all (or most) of the names in the universe.  I think that the "CJS" syntax is verbose because of this feature, not because it loads modules asynchronously.  Since loading modules asynchronously may have higher performance in the long run, I don't see much reason to adopt Dojo's approach.  However, Dojo does include a lot of good snippets that seem to embody a lot of working knowledge on how to make Javascript work in many, many environments, so I do intend to study it throughly.
+
+Let me back these statements up with some code.  This is the Dojo syntax for defining, loading, and using a module:
+:>
+<pre>
+dojo.provide('dojo.provided_module');
+dojo.require('dojo.required_module');
+dojo.provided_module.provision = dojo.required_module.provision;
+</pre>
+/>
+
+This is Cixar Javascript's:
+:>
+<pre>
+this.register('cixar/provided_module.js', function () {
+this.require('cixar/required_module.js', function (that) {
+this.provision = that.provision;
+});
+});
+</pre>
+/>
+
+I particularly like using Javascript's <tt>with</tt> block to effectively bring all of a module into my name-space so that I don't have to qualify any of its names.
+:>
+<pre>
+this.register('my.js', function () {
+this.require('javascript.js', function (js) { with (js) {
+assertEq(js.List, List);
+}});
+});
+</pre>
+/>
+
+I'm getting comfortable with the parentheses and braces because I feel that localizing names is really important for the long term maintainability and extensibility of the world of Javascript.
+
+From this preliminary analysis, I think I will be integrating most of Mootools code since it's small and high quality.  I will probably also integrate parts of Dojo and Mochikit since their feature coverage is quite extensive, but porting whole modules is probably out of the question.  In any case, I will try to bring a comprehensive set of features into CJS so that people coming from any of these frameworks will find some degree of familiarity, if not because of their experience with their respective Javascript libraries, then because of their familiarity with the server side scripting language on which that library was based.
+

@@ -1,0 +1,77 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-452580491756361938</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;Python introduced a short-hand for the adapter pattern on functions.  You can "decorate" a function with another function.  This is a neat tool you can use to factor out some common code from a bunch of functions.  You can fiddle with the arguments, return values, or intercept exceptions thrown by any function you decorate.&lt;/p&gt;
+&lt;p&gt;The canonical example is a memoize decorator.  The idea is to generalize the notion of memoization so you can simply subscribe to it in any function you want to memoize.&lt;/p&gt;
+
+&lt;pre&gt;
+def factorial(n):
+	if n == 1: return 1
+	return n * factorial(n - 1)
+factorial = memoize(factorial)&lt;/pre&gt;
+&lt;p&gt;You accomplish this by writing the &lt;tt&gt;memoize&lt;/tt&gt; decorator.  A decorator is a function that accepts a function and returns another.  Python virtuously provides a shorthand for taking the function, decorating it, and assigning it to a variable with the same name.&lt;/p&gt;
+
+&lt;pre&gt;
+@memoize
+def factorial(n):
+	if n == 1: return 1
+	return n * factorial(n - 1)&lt;/pre&gt;
+&lt;p&gt;In the imagined normal case of decorators, the returned function accepts the same arguments and returns the same kinds of values as the accepted function.  However, a decorator does have the liberty of extending or restricting that interface, like accepting additional arguments or raising an exception if the arguments are of the wrong type.  It might also perform some common computation on the original arguments and pass the result to the original function as an additional argument.  In any case, you can use some closures to create a decorator:&lt;/p&gt;
+
+&lt;pre&gt;
+def memoize(function):
+	cache = {}
+	def decorated(*args):
+		if args not in cache:
+			cache[args] = function(*args)
+		return cache[args]
+	return decorated&lt;/pre&gt;
+&lt;p&gt;Of course, that's too simple.  A lot of things you put after the "@" symbol are just functions that return decorators so that they can be configured with arguments.  For example, you probably want to make a &lt;tt&gt;memoize&lt;/tt&gt; decorator that lets you specify your own &lt;tt&gt;cache&lt;/tt&gt; object.  So, you need another layer of deference.&lt;/p&gt;
+
+&lt;pre&gt;
+def memoize(cache = None):
+	if cache is None: cache = {}
+	def decorator(function):
+		def decorated(*args):
+			if args not in cache:
+				cache[args] = function(*args)
+			return cache[args]
+		return decorated
+	return decorator
+
+@memoize({})
+def factorial(n):
+	if n == 1: return 1
+	return n * factorial(n - 1)&lt;/pre&gt;
+&lt;p&gt;Since, in Python, functions, objects, and types are indistinguishable to the casual observer, you can do the exact same thing with a class, although I shudder to think that you might want to forgo the simplicity and elegance of closures.  After the transform, the previous code might look like this:&lt;/p&gt;
+
+&lt;pre&gt;
+class memoize(object):
+	def __init__(self, cache = None):
+		self.cache = cache
+	def __call__(self, function):
+		return Memoized(function, self.cache)
+
+class Memoized(object):
+	def __init__(self, function, cache = None):
+		if cache is None: cache = {}
+		self.function = function
+		self.cache = cache
+	def __call__(self, *args):
+		if args not in self.cache:
+			self.cache[args] = self.function(*args)
+		return self.cache[args]
+
+@memoize()
+def factorial(n):
+	if n == 1: return 1
+	return n * factorial(n - 1)&lt;/pre&gt;
+&lt;p&gt;So now you can use a Least Recently Used Cache, assuming it is a dictionary-like-object (a duck-dict, if you will):&lt;/p&gt;
+
+&lt;pre&gt;
+from lru_cache import LruCache
+@memoize(LruCache(max_size = 100, cull = .25))
+def factorial(n):
+	if n == 1: return 1
+	return n * factorial(n - 1)&lt;/pre&gt;
+&lt;p&gt;Download &lt;a href="http://cixar.com/~kris.kowal/bdoc/program/python/decorators.zip"&gt;decorators.zip&lt;/a&gt;.&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:56:18.801-07:00</ns0:updated><ns0:published>2008-09-28T21:42:00.001-07:00</ns0:published><ns0:title type="text">Decorators - The Python Saga - Part 2</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/452580491756361938/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=452580491756361938" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/452580491756361938" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/452580491756361938" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2008/09/decorators-python-saga-part-2_28.html" rel="alternate" title="Decorators - The Python Saga - Part 2" type="text/html" /></ns0:entry>

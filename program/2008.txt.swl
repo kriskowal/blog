@@ -1,0 +1,28 @@
+1>New Year's Resolutions
+
+I don't generally make New Years resolutions.  But, since I'm a software engineer, and I've got some milestones to plot, I've decided to post a release schedule for my personal software projects.  This year, I'm going to release < http://cixar.com/tale Tale >.
+
+This involves continued development on < http://cixar.com/tracs/javascript Chiron > JavaScript for the front-end, < http://cixar.com/tracs/ish "Python on Planes" > for the back-end, and lots of new musical, graphical, and programmatic content.
+
+I'm of course still looking for volunteers (occasionally paid help, if I must and it's worth it) to develop various parts.  Chris Pasillas has been working on composing music for the game; we've got a lot of content and had a < http://cixar.com/~kris/tale/music/pasillas/meeting.mp3 "meeting [mp3]" > last week to develop creative direction.  However, if someone's equipped to render orchestrated versions of the music from the MIDI's (I've got Jonathan DeKlotz in mind for this, but he's a busy fellow too), that would be a super-awesome contribution.  We could also use some help from smart, creative, driven (perhaps by angst, anger, or escapism; whatever works for you) programmers who know or are eager to learn Python to develop the actual game engine logic and "mob procs"; this is a lot of work and the bulk of player experience, but I must admit that I'm only marginally interested in developing this aspect of the game, plus I've got a lot of work ahead of me to re-integrate PoP and Chiron.  I've had some help from Scott, and Josh "Jynx" Jenkins to develop the game math, plus some ideas of my own in the works, but someone who can dedicate programming time to make ideas real could have a big impact.  There are also a lot of Python and JavaScript mini-projects that I may or may not have time to develop myself with the remaining year of schedule, many of which would be very interesting, like intelligent narrative generation from event description trees, SVG sprite composition and rendering (partially implemented), much more 2d vector art for content, game state logic (making lots of use of Python generators if you want to learn about that), and much more.  Most of all, Tale needs volunteers who are willing to give a part of their soul, as I have, to the project.  Here's the development schedule.
+
+c>
+    2008>
+        1.1>Post Chiron 0.1 (done)
+        2.2>Deploy Chiron Website
+        5.3>Post Python on Planes 0.1
+        6.1>Release Chiron 1.0
+        6.1>Begin Tale Invitation Beta
+        12.5>Begin Tale Public Beta
+    />
+    2009>
+        1.1>Deploy Tale 1.0
+    />
+/>
+
+This year will also mark another major step in the collision of my hobby-life and work-life.  I've never mentioned this in my personal blog, but I've been working at < http://www.apple.com/ Apple > for the last year and a half, but I'll be moving on to work for a start-up spun off of a networking lab at Caltech called < http://fastsoft.com/ FastSoft > where I will be developing the web user-interface for their Aria, a wide-area network performance optimizer.  This means I'll be much busier, and I'll be able to work on open-source projects like Chiron as part of my job.
+
+Looking back at all of my personal projects for the last eight years, a pattern emerges.  I want my code to help as many people as possible.  As for my motivations, as I realized over lunch with Ryan Witt and Christine Ortega over lunch last week, I'm an artist &mdash; I'm performing for an audience and am gratified for appreciation of my creations.  I'm a fan of Reusability and Repurposability with big R's.  This has implications for the nature of the projects I find interesting.  I prefer to write libraries and languages: crystalline, orthogonal, refined, applicable, general, powerful, hosting usefulness through emergent patterns: uses unforeseen.  Reusability is also best served by proliferation, and what better way to proliferate a thing by making it valuable and free.  This isn't economics where value, cost, supply, and demand have interesting but vague relationships; I mean value as usefulness minus cost.  Also, what better way to make a thing valuable than to permit your users to exercise and refine it themselves and give them every reason in the world to share their contributions.  On a selfish note, I prefer to write software I can use anywhere, even if I'm working on something proprietary.  What I'm getting at here is Open Source, with a free, non-viral license.  I've chosen other licenses in the past for various purposes, withholding a piece of value for myself for money or the cause of freedom, but for the raw purposes of Reusability, Repurposability, proliferation, and the advancement of the state of the art, I've chosen to use a permissive, free, non-viral license.  So, my contributions to Chiron and PoP, at work and at home, will be available with the MIT license.
+
+Happy New Year; let's make.
+

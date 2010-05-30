@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-7610328813394565095</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;I've been poring over Javascript libraries lately, trying to ascertain the extent of their features, how much implementation overlap there is among them, and which ones implement certain features best.  The idea is that I'm going to integrate the best tidbits into Cixar Javascript.  I'm reading:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;Yahoo's &lt;a href="http://developer.yahoo.com/yui/"&gt;YUI&lt;/a&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://dojotoolkit.org/"&gt;Dojo&lt;/a&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://www.prototypejs.org/"&gt;Prototype&lt;/a&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://mootools.net/"&gt;Mootools&lt;/a&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://mochikit.com/"&gt;Mochikit&lt;/a&gt;, and&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://script.aculo.us"&gt;Scriptaculous&lt;/a&gt;, plus outliers and extensions like&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://www.flapjax-lang.org/"&gt;Flapjax&lt;/a&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://www.mooshow.eatpixels.com/"&gt;Mooshow&lt;/a&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://www.ibegin.com/ibox/ibox-test.html"&gt;iBox&lt;/a&gt;, and&lt;/li&gt;
+	&lt;li&gt;&lt;a href="http://www.huddletogether.com/projects/lightbox/"&gt;Lightbox&lt;/a&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Please contact me if I need to add a library to my reading list.&lt;/p&gt;
+&lt;p&gt;I've got some general impressions so far.  Dojo and Mochikit are by far the heaviest.  They're loaded with lots and lots of well tested unreadable undocumented components.  Dojo supports its own weight because it's the only Javascript library that has a module loader, albeit a module loader that loads modules into the global name-space.  YUI, Mootools, and Scriptaculous are comparatively higher quality but smaller and limited to their size by the lack of a good module system.  YUI is the best documented, having lots of Javadoc style comments.  Mootools, I think proves to be the highest quality code for the few things it does and does rather well.  Scriptaculous and its base library Prototype, spun off the Ruby on Rails project, both seem to work pretty well, but the code is criminally bad, showing lots of signs of having been designed by whim.  I get a very strong "the least that would work" vibe from it.&lt;/p&gt;
+&lt;p&gt;Dojo's module system intrigued me because it loads modules synchronously with AJAX and Javascript's &lt;tt&gt;eval&lt;/tt&gt;.  I've considered applying the same ideas for Cixar Javascript's module system.  However, the current Cixar Javascript module system puts the power of nomenclature into the hands of the module writer, not the hands of Kurremkarmerruk, the Wizard who knows and manages all (or most) of the names in the universe.  I think that the "CJS" syntax is verbose because of this feature, not because it loads modules asynchronously.  Since loading modules asynchronously may have higher performance in the long run, I don't see much reason to adopt Dojo's approach.  However, Dojo does include a lot of good snippets that seem to embody a lot of working knowledge on how to make Javascript work in many, many environments, so I do intend to study it throughly.&lt;/p&gt;
+&lt;p&gt;Let me back these statements up with some code.  This is the Dojo syntax for defining, loading, and using a module:&lt;/p&gt;
+
+&lt;pre&gt;
+dojo.provide('dojo.provided_module');
+dojo.require('dojo.required_module');
+dojo.provided_module.provision = dojo.required_module.provision;
+&lt;/pre&gt;
+&lt;p&gt;This is Cixar Javascript's:&lt;/p&gt;
+
+&lt;pre&gt;
+this.register('cixar/provided_module.js', function () {
+this.require('cixar/required_module.js', function (that) {
+this.provision = that.provision;
+});
+});
+&lt;/pre&gt;
+&lt;p&gt;I particularly like using Javascript's &lt;tt&gt;with&lt;/tt&gt; block to effectively bring all of a module into my name-space so that I don't have to qualify any of its names.&lt;/p&gt;
+
+&lt;pre&gt;
+this.register('my.js', function () {
+this.require('javascript.js', function (js) { with (js) {
+assertEq(js.List, List);
+}});
+});
+&lt;/pre&gt;
+&lt;p&gt;I'm getting comfortable with the parentheses and braces because I feel that localizing names is really important for the long term maintainability and extensibility of the world of Javascript.&lt;/p&gt;
+&lt;p&gt;From this preliminary analysis, I think I will be integrating most of Mootools code since it's small and high quality.  I will probably also integrate parts of Dojo and Mochikit since their feature coverage is quite extensive, but porting whole modules is probably out of the question.  In any case, I will try to bring a comprehensive set of features into CJS so that people coming from any of these frameworks will find some degree of familiarity, if not because of their experience with their respective Javascript libraries, then because of their familiarity with the server side scripting language on which that library was based.&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:50.409-07:00</ns0:updated><ns0:published>2007-02-01T22:36:00.001-08:00</ns0:published><ns0:title type="text">Javascript Libraries</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/7610328813394565095/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=7610328813394565095" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/7610328813394565095" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/7610328813394565095" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2007/02/javascript-libraries_01.html" rel="alternate" title="Javascript Libraries" type="text/html" /></ns0:entry>

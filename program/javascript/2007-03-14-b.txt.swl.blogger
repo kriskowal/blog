@@ -1,0 +1,93 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-8928531683057180843</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;In Javascript, functions don't really have intrinsic names.  The name is just a variable you've assigned an anonymous function object to.&lt;/p&gt;
+
+&lt;pre&gt;
+function a () {}
+/* is the same as */
+var a = function () {};&lt;/pre&gt;
+&lt;p&gt;You can tell a function that it should use some other object as "this".&lt;/p&gt;
+
+&lt;pre&gt;
+var egg = new Egg();
+var weasel = new Sweater();
+egg.break.call(weasel);&lt;/pre&gt;
+&lt;p&gt;You can also send any number of arguments to the function, even if it doesn't ask for them.  Then, inside the function, you can get at all the extra arguments with the &lt;tt&gt;arguments&lt;/tt&gt; variable.&lt;/p&gt;
+
+&lt;pre&gt;
+(function (a, b) {
+	assert(a == 10);
+	assert(b == 20);
+	assert(arguments[1] == 20);
+	assert(arguments[2] == 30);
+}).call(this, 10, 20, 30);&lt;/pre&gt;
+&lt;p&gt;You can send arguments to a function from an &lt;tt&gt;Array&lt;/tt&gt;.&lt;/p&gt;
+
+&lt;pre&gt;
+(function (a, b, c) {
+	assert(a == 1);
+	assert(b == 2);
+	assert(c == 3);
+}).apply(this, [1, 2, 3]);&lt;/pre&gt;
+&lt;p&gt;You can even make up an array of arguments with a program.&lt;/p&gt;
+
+&lt;pre&gt;
+var array = [1];
+array.push(2);
+assert(array == [1, 2]);
+var sum = function (a, b) {
+	return a + b;
+}
+assert(sum.apply(this, array) == 3);&lt;/pre&gt;
+&lt;p&gt;You don't have to give a function all of the arguments it asks for.&lt;/p&gt;
+
+&lt;pre&gt;
+(function (a, b, c) {
+	assert(a == 10);
+	assert(b == 20);
+	assert(c == undefined);
+})(10, 20);&lt;/pre&gt;
+&lt;p&gt;You can run programs/recipes that you get as quoted data.&lt;/p&gt;
+
+&lt;pre&gt;eval("var a = 10; a = a + 1");&lt;/pre&gt;
+&lt;p&gt;When you &lt;tt&gt;eval&lt;/tt&gt;, you can see all the data in the caller's closure.&lt;/p&gt;
+
+&lt;pre&gt;
+var a = 10;
+eval('a = 20');
+assert(a == 20);&lt;/pre&gt;
+&lt;p&gt;An interesting thing about putting Javascript in HTML is that all of the scripts have the same closure.&lt;/p&gt;
+
+&lt;pre&gt;
+&amp;lt;script&amp;gt;
+	var global = true;
+&amp;lt;script&amp;gt;
+&amp;lt;script&amp;gt;
+	assert(global);
+&amp;lt;script&amp;gt;&lt;/pre&gt;
+&lt;p&gt;You can wrap a bit of code in a closure so that its names are all its own, can't conflict with other scripts.&lt;/p&gt;
+
+&lt;pre&gt;
+var global = true;
+(function () {
+	var local = true;
+})();
+/* local is not visible here */&lt;/pre&gt;
+&lt;p&gt;In a web browser, the context object for the entire program is the &lt;tt&gt;Window&lt;/tt&gt; object containing the script.&lt;/p&gt;
+
+&lt;pre&gt;
+assert(this == window);
+(function () {
+	assert(this != window);
+	assert(this == 10);
+}).call(10);&lt;/pre&gt;
+&lt;p&gt;The window is also the base closure for your program, so you can access everything in it as if it were a local variable.&lt;/p&gt;
+
+&lt;pre&gt;window.document == document&lt;/pre&gt;
+&lt;p&gt;You can play this trick with any object's member data or functions using the &lt;tt&gt;with&lt;/tt&gt; block.&lt;/p&gt;
+
+&lt;pre&gt;
+with ({'a': 10}) {
+	assert(a == 10);
+}&lt;/pre&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:53.055-07:00</ns0:updated><ns0:published>2007-03-14T21:47:00.001-07:00</ns0:published><ns0:title type="text">Javascript Functions, Accelerated Introduction</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/8928531683057180843/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=8928531683057180843" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8928531683057180843" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8928531683057180843" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2007/03/javascript-functions-accelerated_14.html" rel="alternate" title="Javascript Functions, Accelerated Introduction" type="text/html" /></ns0:entry>

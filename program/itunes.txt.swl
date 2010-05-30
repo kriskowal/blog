@@ -1,0 +1,61 @@
+1>My iTunes Playlist
+
+I have almost 9,000 songs, comprising a month of continuous play and 60GB of storage.  I've actually listened to maybe half and rated about 20% of the library.  Random shuffle doesn't work for me anymore.
+
+When I was in college, I noticed that trying to do homework with lyrical music hindered my productivity, presumably because it engaged my otherwise occupied language brain-matter.  I'm also a musician, so I've definitely collected a trove of anecdotal evidence supporting the assertion that exposure and repetition to particular pieces (and broadly but with weaker correlation, certain genres) expands appreciation.  Also, overexposure diminishes the effect, presumably because the amygdala begins tuning out the pattern.  Randomly traversing my library usually leads to irritation.  Also, I thirst for new, rare, serendipitous musical experiences at the expense of occasionally hearing a piece I'm not ready for.
+
+So, on account of what I presume to be common psychological phenomena, my ideal musical experience would consist of:
+
+*>
+    mostly music I know and like
+    some music I don't know occasionally
+    no music that I definitely don't like
+    some constant minimum interval between playback of a given piece.
+    intervals between hearing a given song inversely proportional to how well I like the piece
+    over time, my playlist should improve as I provide feedback to the system
+/>
+
+A few months ago, I found a way to accomplish this with iTunes smart playlists.  I construct "pools" of songs.  Each pool contains only songs that have a particular rating and haven't been played recently.  If there are lot of songs with a particular rating, I generally require a longer interval between plays.  So, I created a pool for each rating, and maximum number of songs in each pool to tune the probability of a a song being chosen from each category.  Then, I created a master smart playlist that incorporates all of the rating pools.
+
+<img src="http://cixar.com/~kris.kowal/bdoc/program/itunes/mixes.png" alt="Playlists">
+
+2>5 stars
+
+I have 76 tunes in this category.  Almost all of them can make it to the master playlist.  Since they play frequently, the dominant factor is when they were last played.  The number of songs that haven't been played or skipped in the last 5 days hovers around 20.  As a special factor for these, I broke the songs that are longer than 10 minutes into their own category so that only two of them contribute to the master mix at any time.  I like Mahler's second symphony a <b>WHOLE LOT</b>, but a half an hour is a long commitment and I prefer to save it for maybe once every other week.  I also have about ten different versions of Beethoven's Symphony 7 movement 2, so I might have to make a new category for it so only one of them comes up at a time.
+
+<img src="http://cixar.com/~kris.kowal/bdoc/program/itunes/mix-5.png" alt="5 Star Mix Predicates">
+
+2>4 stars
+
+200 tunes total.  200 tune limit.  20 days between playing.  Defer 10 days if skipped.  Stable around 20 tunes contributed to the master playlist, so minimum interval is the dominant factor.
+
+2>3 stars
+
+800 tunes total.  100 tune limit, sampled from least recently played.  Defer 1 week if skipped.  Stable at 100 tunes contributed to the master playlist, so the maximum sample size is the dominant factor.
+
+<img src="http://cixar.com/~kris.kowal/bdoc/program/itunes/mix-3.png" alt="3 Star Mix Predicates">
+
+2>2 stars
+
+800 tunes total.  20 tune limit, sampled randomly.  Defer 4 months when played or skipped.  stable at 20 contributed to the master playlist, so the maximum sample size is the dominant factor.
+
+2>1 star
+
+I reserve this rating for songs I don't want to hear in a random shuffle, but don't want to delete either.  This includes Christmas tunes, apart from the soundtrack to <i>The Nightmare Before Christmas</i>.  There are about 400 of these.  I should probably use this rating for songs I would like to very rarely hear and use the checkbox to exorcise a song from my random shuffle.
+
+2>0 stars
+
+These are songs I've not rated.  6500 tunes.  30 tune limit, sampled randomly.  Playing or skipping defers the next chance to play for six months.  There are 30 tunes in this playlist, so the dominant factor is the max tune limit.
+
+2>Mix
+
+Then I create a my main mix playlist from these rating pool lists.  The trick is to create an "any" predicate and include all of the smaller playlists with playlist predicate rules.
+
+<img src="http://cixar.com/~kris.kowal/bdoc/program/itunes/mix.png" alt="Master Mix Predicates">
+
+->>
+
+So, believe it or not, this minimizes my need to fiddle with iTunes and keeps me focused on work.  If you've got a ridiculous music library too, I highly recommend this technique.
+
+Also, if you work on iTunes, I highly recommend providing a smart playlist abstraction with equalizer knobs for each rating to automate similar processes; not everyone's a programmer and I bet this problem is just beginning to surface for most folks.  It would be nice to see how probable a particular song is to be played based on the size of its pool, the effective sample size of its pool, and the total of all sample sizes.  I also want to be able to sort and filter and bulk set "checked" and "unchecked".
+

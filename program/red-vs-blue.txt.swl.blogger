@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-356214546083995583</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;Shawn Tice and I developed a random maze generator for the &lt;a href="http://cixar.com/moot/Mage"&gt;M.U.D.&lt;/a&gt; project.  The purpose of our design was to generate a closed world of arbitrary size, where all rooms are accessible from any other.&lt;/p&gt;
+&lt;p&gt;We restricted the world's shape to square with sides that measure as powers of two.  That way, we could recursively generate the world with the following rules:&lt;/p&gt;
+
+&lt;ol type=1&gt;
+	&lt;li&gt;for all rooms larger than a unit room (1x1)&lt;/li&gt;
+
+	&lt;ol type=1&gt;
+		&lt;li&gt;the room posesses four rooms, one in each quadrant&lt;/li&gt;
+		&lt;li&gt;the room posesses four exits that are either passable or walled&lt;/li&gt;
+		&lt;li&gt;any exit that is passable may be divided in half, closed in by a wall on either side&lt;/li&gt;
+		&lt;li&gt;between each quadrant is a partition&lt;/li&gt;
+		&lt;li&gt;at most, one partition is a wall&lt;/li&gt;
+		&lt;li&gt;all other partitions are passable, guaranteeing that all quadrants are accessible by at least one path.&lt;/li&gt;
+	&lt;/ol&gt;
+	&lt;li&gt;for all rooms&lt;/li&gt;
+
+	&lt;ol type=1&gt;
+		&lt;li&gt;all surrounding partitions are walls if they do not lead to a room&lt;/li&gt;
+	&lt;/ol&gt;
+&lt;/ol&gt;
+&lt;p&gt;Here's how one maze turned out:&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/red-vs-blue/maze.gif"/&gt;&lt;/p&gt;
+&lt;p&gt;The numbers represent the width of each room in the following diagram.  Each successive maze is a more detailed version of the previous.&lt;/p&gt;
+&lt;p&gt;For the purpose of testing, we'll probably populate this maze with two warring clans, Red versus Blue.  I doctored an image off of &lt;a href="http://www.nuklearpower.com/latest.php"&gt;Eight Bit Theatre&lt;/a&gt; with Macromedia Fireworks for the purpose.  For kicks, I made the layers functional.&lt;/p&gt;
+
+&lt;p&gt;
+&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/red-vs-blue/red.png"/&gt;
+&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/red-vs-blue/red-hair.gif"/&gt;
+&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/red-vs-blue/red-shoulders.gif"/&gt;
+&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/red-vs-blue/red-breastplate.gif"/&gt;
+&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/red-vs-blue/red-tunic.gif"/&gt;
+&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/red-vs-blue/red-pants.gif"/&gt;
+&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/red-vs-blue/red-naked.gif"/&gt;
+&lt;/p&gt;
+&lt;p&gt;The first image is the PNG.  The original image probably belongs to &lt;a href="http://www.squaresoft.com/"&gt;Square-Enix&lt;/a&gt;.&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:56:47.821-07:00</ns0:updated><ns0:published>2005-10-16T16:03:00.000-07:00</ns0:published><ns0:title type="text">Red vs Blue</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/356214546083995583/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=356214546083995583" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/356214546083995583" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/356214546083995583" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2005/10/red-vs-blue.html" rel="alternate" title="Red vs Blue" type="text/html" /></ns0:entry>

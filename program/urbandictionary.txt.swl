@@ -1,0 +1,5 @@
+
+1> Urban Dictionary for Firefox Toolbar
+
+I took some time for the last couple days and implemented a < http://cixar.com/urbandictionary/ "Firefox extension" > for < http://urbandictionary.com >.  It looks up words you select and displays their definitions (if extant) in a (normally hidden) toolbar.
+

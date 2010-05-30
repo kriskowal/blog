@@ -1,0 +1,49 @@
+1><tt>Dict</tt> versus <tt>dict</tt>
+
+Chiron's <tt>base</tt> module provides bot a <tt>dict</tt> operator and a <tt>Dict</tt> factory method, as well as <tt>List</tt> and <tt>list</tt>, and analogously <tt>Set</tt> and <tt>unique</tt>.  <tt>Dict</tt> and <tt>dict</tt> both accept the same basic types.
+
+">
+ dict({a: 10}) =
+ Dict({a: 10}) =
+ Dict([["a", 10]])
+/>
+
+">
+ dict("abc") =
+ Dict("abc") =
+ Dict([[0, "a"], [1, "b"], [2, "c"]]) =
+ dict(["a", "b", "c"]) =
+ Dict(["a", "b", "c"]) =
+ Dict(iter("abc"))
+/>
+
+In code, the difference is that <tt>Dict</tt> is a <tt>type</tt> and <tt>dict</tt> is an <tt>operator</tt>.  The difference in practice is that <tt>dict</tt> first checks whether the first argument is a subtype of <tt>Base</tt> (which includes all objects using the <tt>type</tt> system), and whether it implements a <tt>dict</tt> method.  If so, it defers to that polymorphic <tt>dict</tt> method.  Otherwise, it defers to <tt>Dict</tt>.
+
+">
+ var base = require('./base');
+ var test = require('./test');
+ exports.Foo = base.type(function (self, supr) {
+  self.dict = function () {
+   return base.Dict({'a': 10});
+  };
+ });
+ var foo = exports.Foo();
+ test.assertEq(
+  base.dict(foo),
+  base.Dict({'a': 10}),
+  'dict behaves as a polymorphic operator'
+ );
+/>
+
+The same difference applies to the polymorphic operators <tt>unique</tt> (that defers to <tt>Set</tt> if <tt>unique</tt> is not a member of the type), or <tt>list</tt> (that defers to <tt>List</tt> if <tt>list</tt> is not a member of the type).  <tt>object</tt> and <tt>array</tt> are also polymorphic operators that work as copy constructors for <tt>Object</tt> and <tt>Array</tt>, but also defer to polymorphic <tt>object</tt> and <tt>array</tt> members.  The default behaviors of <tt>object</tt> and <tt>array</tt> are to copy or coerce the argument to an <tt>Object</tt> or <tt>Array</tt>, since <tt>Object</tt> and <tt>Array</tt> cannot be used as copy constructors themselves.  A complete variety of coercions are possible, extending well into the bizarre and insane.
+
+">
+ array("abc") =
+ ["a", "b", "c"]
+/>
+
+">
+ object([1, 2, 3]) =
+ {'0': 1, '1': 2, '2': 3}
+/>
+

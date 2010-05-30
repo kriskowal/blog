@@ -1,0 +1,100 @@
+
+1> Properties - The Python Saga - Part 3
+
+Properties come out of a tired programming language genesis.  In the beginning, there were structs.  The trouble with structs was that an opaque data structure could not programmatically monitor or intercept access and mutation of its member data.
+
+So that's not a big deal; we could solve the problem with classes.  The best practice to avoid programming yourself into a corner was to <i>never</i> expose a datum; you would write accessor and mutator functions, whether you needed them at the moment or not.  Thus, as your design grew, you <i>could</i> eventually do nice things like validation, observation, or proxying.  The trouble with this approach was that you had to write six times as much code on the off chance you'd need to extend it some day.  But it was worth it.
+
+The idea of managed properties came along eventually in various languages (Python, C#, some implementations of JavaScript, and recent versions of [C]).  The notion is that you would initially write all of your classes like structs with member data camped in public view.  You would encourage your API consumers to interact with those members directly.  Then, as need arose, you would subvert the member variables with property objects.  These objects would intercept accesses and mutations with functions that you could write at any time of your design process.
+
+Lets observe this design shift in Python.  Here's a class with unmanaged data:
+
+">
+ class Foo(object):
+  def __init__(self);
+   self.bar = 10
+/>
+
+Here's some other fellow's code that uses your class:
+
+">
+ foo = Foo()
+ foo.bar = 20
+ print foo.bar
+ del foo.bar
+/>
+
+So there you have it.  Just to keep on the same page, the idea at this point is to add a feature to Python that permits both of those code samples to work and, in-fact, be perfectly cromulent.  However, we also want to eventually add features to <tt>Foo</tt> such that its <tt>bar</tt> attribute can be managed, validated, proxied, secured, or outright lied about.  Enter <tt>property</tt>.  <tt>property</tt> is a function that accepts an accessor function and optional mutator and deleter functions.  The property must be a class attribute to work.  Here's how you would use a property:
+
+">
+ class Foo(object):
+  def __init__(self):
+   self.bar = 10
+  def get_bar(self, objekt, klass):
+   return self.baz / 2
+  def set_bar(self, objekt, value):
+   self.baz = value * 2
+  def del_bar(self, objekt):
+   del self.baz
+  bar = property(get_bar, set_bar, del_bar)
+/>
+
+Now we have a Foo class that transparently maintains the invariant that "bar" will always be half of "baz".
+
+Sometimes you don't need to have a setter for a property, and you almost never need a deleter.  For the common case, you can use the <tt>property</tt> function as a decorator.
+
+">
+ class Foo(object):
+  def __init__(self):
+   self.baz = 20
+  @property
+  def bar(self):
+   return self.baz / 2
+/>
+
+2> Creating the <tt>property</tt> function.
+
+So, it's easy to assume that the <tt>property</tt> function does all the magic behind the scenes, setting up traps in your class's accessor and mutator paths.  There's actually another layer of code that can be done entirely in Python.  That is, we can implement the <tt>property</tt> function in pure Python.  The trick is that the <tt>property</tt> function is actually a type or factory method (who cares which) that returns a Python duck-type: a property object.  A property object is any object that implements <tt>__get__</tt>, <tt>__set__</tt>, or <tt>__del__</tt>.  These are special magic Python functions that intercept access, mutation, and deletion on members.  All you have to do is install an object on a class with one of methods defined, with the name of the member you want to manage.  The <tt>property</tt> function just handles the common cases.  Let's redefine the property function in Python, as the <tt>Property</tt> class.
+
+">
+ class Property(object):
+  def __init__(self, fget):
+   self.fget = fget
+  def __get__(self, objekt, klass):
+   return self.fget(objekt)
+/>
+
+This defines enough of the <tt>Property</tt> object to decorate an accessor function.
+
+">
+ class Foo(object):
+  def __init__(self):
+   self.baz = 20
+  @Property
+  def bar(self):
+   return self.baz / 2
+/>
+
+Here's a full implementation of <tt>Property</tt>.  You will note that, in order to exactly emulate the <tt>property</tt> object, the <tt>__init__</tt> method has the same argument names as the internal <tt>property</tt> so that code that uses keyword arguments will function in perfect ambivalence.
+
+">
+ class Property(object):
+  def __init__(
+   self,
+   fget,
+   fset = None,
+   fdel = None,
+   doc = None,
+  ):
+   self.fget = fget
+   self.fset = fset
+   self.fdel = fdel
+   self.__doc__ = doc
+  def __get__(self, objekt, klass):
+   return self.fget(objekt)
+  def __set__(self, objekt, value):
+   self.fset(objekt, value)
+  def __del__(self, objekt):
+   self.fdel(objekt)
+/>
+

@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-3746362007782238958</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;I've learned a few handy commands this year, so here's the wealth.&lt;/p&gt;
+&lt;p&gt;Sets have always been a big hole in my command line toolkit.  I've gone to such lengths as to implement commands for basic set intersection and union in Perl or Python.  Go no farther!  While looking over &lt;a href="http://blog.joshlewis.org/"&gt;Lasermacaroni&lt;/a&gt;'s shoulder about a year ago, I noticed that he used the &lt;tt&gt;comm&lt;/tt&gt; command.  &lt;tt&gt;comm&lt;/tt&gt; operates on sorted unique streams of lines and produces a three column output of which elements were in column A only, column B only, or both.  Of course, three columns are nearly useless, so you can tell &lt;tt&gt;comm&lt;/tt&gt; to suppress the output of certain columns.  Yes, this is stupid, but here's your mnemonic: ask not what columns comm can display for you, rather ask what columns you can suppress from comm.  Go!&lt;/p&gt;
+
+&lt;pre&gt;
+A &amp; B: comm -12 A B
+A &amp; !B: comm -23 A B
+!A &amp; B: comm -13 A B
+A | B: cat A B | sort | uniq&lt;/pre&gt;
+&lt;p&gt;Of course, I like to use &lt;tt&gt;comm&lt;/tt&gt; like &lt;tt&gt;grep&lt;/tt&gt; or &lt;tt&gt;grep -v&lt;/tt&gt; to find the elements from an input stream that either are or are not in a given file.  Mind that your file needs to be sorted and uniqued.&lt;/p&gt;
+
+&lt;pre&gt;
+also in A:  ... | sort | uniq | comm -12 - A
+not in A:   ... | sort | uniq | comm -23 - A&lt;/pre&gt;
+&lt;p&gt;I've known about the &lt;tt&gt;seq&lt;/tt&gt; command in Linux-land for a while.  It creates lists of numbers in a given range.&lt;/p&gt;
+
+&lt;pre&gt;
+seq &lt;i&gt;last&lt;/i&gt;
+seq &lt;i&gt;first&lt;/i&gt; &lt;i&gt;last&lt;/i&gt;
+seq &lt;i&gt;first&lt;/i&gt; &lt;i&gt;stride&lt;/i&gt; &lt;i&gt;last&lt;/i&gt;&lt;/pre&gt;
+&lt;p&gt;For examples:&lt;/p&gt;
+
+&lt;pre&gt;
+&lt;b&gt;$ seq 3&lt;/b&gt;
+1
+2
+3
+&lt;b&gt;$ seq 3 5&lt;/b&gt;
+3
+4
+5
+&lt;b&gt;$ seq 0 2 4&lt;/b&gt;
+0
+2
+4&lt;/pre&gt;
+&lt;p&gt;I was quite disappointed not to find &lt;tt&gt;seq&lt;/tt&gt; on Mac OS X.  Turns out the BSD folks have a pretty bad case of &lt;a href="http://en.wikipedia.org/wiki/Not_Invented_Here"&gt;NIH&lt;/a&gt;.  Instead of the &lt;tt&gt;seq&lt;/tt&gt; function, you may, having the good fortune of working around brilliant people every day, notice a friend, coworker, or other friendly mammal use the &lt;tt&gt;jot&lt;/tt&gt; command to produce their streams of numbers.&lt;/p&gt;
+
+&lt;pre&gt;jot &lt;i&gt;[reps [begin [end [stride]]]]&lt;/i&gt;&lt;/pre&gt;
+&lt;p&gt;Here are some occlusive examples:&lt;/p&gt;
+
+&lt;pre&gt;
+&lt;b&gt;$ jot 3&lt;/b&gt;
+1
+2
+3
+&lt;b&gt;$ jot 3 5&lt;/b&gt;
+5
+6
+7
+&lt;b&gt;% jot 3 0 6&lt;/b&gt;
+0
+3
+6
+&lt;b&gt;% jot 3 1 1&lt;/b&gt;
+1
+1
+1
+&lt;b&gt;jot -b+ -s- 40&lt;/b&gt;
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+&lt;/pre&gt;
+&lt;p&gt;&lt;i&gt;fin&lt;/i&gt;&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:56:21.140-07:00</ns0:updated><ns0:published>2008-01-10T21:57:00.000-08:00</ns0:published><ns0:title type="text">Some Handy Commands</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/3746362007782238958/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=3746362007782238958" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/3746362007782238958" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/3746362007782238958" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2008/01/some-handy-commands.html" rel="alternate" title="Some Handy Commands" type="text/html" /></ns0:entry>

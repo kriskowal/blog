@@ -1,0 +1,75 @@
+1>Some Handy Commands
+
+I've learned a few handy commands this year, so here's the wealth.
+
+Sets have always been a big hole in my command line toolkit.  I've gone to such lengths as to implement commands for basic set intersection and union in Perl or Python.  Go no farther!  While looking over < http://blog.joshlewis.org/ Lasermacaroni >'s shoulder about a year ago, I noticed that he used the <tt>comm</tt> command.  <tt>comm</tt> operates on sorted unique streams of lines and produces a three column output of which elements were in column A only, column B only, or both.  Of course, three columns are nearly useless, so you can tell <tt>comm</tt> to suppress the output of certain columns.  Yes, this is stupid, but here's your mnemonic: ask not what columns comm can display for you, rather ask what columns you can suppress from comm.  Go!
+
+">
+ A & B: comm -12 A B
+ A & !B: comm -23 A B
+ !A & B: comm -13 A B
+ A | B: cat A B | sort | uniq
+/>
+
+Of course, I like to use <tt>comm</tt> like <tt>grep</tt> or <tt>grep -v</tt> to find the elements from an input stream that either are or are not in a given file.  Mind that your file needs to be sorted and uniqued.
+
+">
+ also in A:  ... | sort | uniq | comm -12 - A
+ not in A:   ... | sort | uniq | comm -23 - A
+/>
+
+I've known about the <tt>seq</tt> command in Linux-land for a while.  It creates lists of numbers in a given range.
+
+">
+ seq <i>last</i>
+ seq <i>first</i> <i>last</i>
+ seq <i>first</i> <i>stride</i> <i>last</i>
+/>
+
+For examples:
+">
+ <b>$ seq 3</b>
+ 1
+ 2
+ 3
+ <b>$ seq 3 5</b>
+ 3
+ 4
+ 5
+ <b>$ seq 0 2 4</b>
+ 0
+ 2
+ 4
+/>
+
+I was quite disappointed not to find <tt>seq</tt> on Mac OS X.  Turns out the BSD folks have a pretty bad case of < http://en.wikipedia.org/wiki/Not_Invented_Here NIH >.  Instead of the <tt>seq</tt> function, you may, having the good fortune of working around brilliant people every day, notice a friend, coworker, or other friendly mammal use the <tt>jot</tt> command to produce their streams of numbers.
+
+">
+ jot <i>[reps [begin [end [stride]]]]</i>
+/>
+
+Here are some occlusive examples:
+
+">
+ <b>$ jot 3</b>
+ 1
+ 2
+ 3
+ <b>$ jot 3 5</b>
+ 5
+ 6
+ 7
+ <b>% jot 3 0 6</b>
+ 0
+ 3
+ 6
+ <b>% jot 3 1 1</b>
+ 1
+ 1
+ 1
+ <b>jot -b+ -s- 40</b>
+ +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+/>
+
+<i>fin</i>
+

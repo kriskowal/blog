@@ -1,0 +1,8 @@
+1>Javascript Events
+
+This evening, I finally got around to implementing event base classes for the Cixar Javascript Library for Tale.  These events resemble W3C DOM events but add some much needed complexity under the hood.
+
+I've implemented <tt>Event</tt>, <tt>Dispatch</tt>, and <tt>Observable</tt>.  <tt>Event</tt> is a base-class for events that implements the usual <tt>stopPropagation</tt> and <tt>cancelDefault</tt>.  <tt>Dispatch</tt> creates a function object for dispatching an <tt>Event</tt> with optionally overridden event type or event factory and default function.  <tt>Observable</tt> can be mixed into any type to permit users to <tt>listen</tt> to method invocations.  This is the beginning of the fun.  <tt>Dispatch</tt> implements <tt>call</tt> and <tt>listen</tt> as expected.  Additionally, <tt>Dispatch</tt> implements <tt>listenBefore</tt> and <tt>listenAfter</tt> so you can attach event listeners that will fire before any other listener as yet attached, or after the default function and any other listeners have dispatched.  Additionally, all of these listener functions return a new <tt>Dispatch</tt> object so you can assure that your listeners will fire in order relative to each other.  This behavior is recursive, so you can attach a listener before or after any other listener.
+
+Here's the < https://cixar.com/tracs/javascript/browser/test/event.js "unit test" >.
+

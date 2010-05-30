@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-8085390981222616685</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;&lt;!-- :vim:lbr:wrap:co=80 --&gt;&lt;/p&gt;
+&lt;p&gt;I've started a project on &lt;a href="http://github.com"&gt;github&lt;/a&gt; for my collection of general-purpose shell scripts: the ones I keep in &lt;a href="http://github.com/kriskowal/xbin/tree/master"&gt;~/bin&lt;/a&gt; on each of my shell accounts.  If you have any general purpose utilities, don't hesitate to fork the project; I'm sure we could collectively build a fantastic set of power tools.&lt;/p&gt;
+
+
+&lt;hr&gt;
+&lt;p&gt;I wrote a new one this week, called &lt;tt&gt;xip&lt;/tt&gt;, that is a shell analog for the &lt;tt&gt;zip&lt;/tt&gt; function in many languages (the name &lt;tt&gt;zip&lt;/tt&gt; is naturally reserved for the &lt;tt&gt;pkzip&lt;/tt&gt; utility).  I created this script to join the ranks of &lt;tt&gt;diff&lt;/tt&gt; and &lt;tt&gt;comm&lt;/tt&gt;, all functions that benefit from multiple input streams.  This comes on the heels of discovering at &lt;a href="http://commandlinefu.com"&gt;commandlinefu.com&lt;/a&gt; that there's a syntax for subshell fifo replacement.  That is, you can supply a subshell as an argument to a command, and it will be replaced with the file name of a named pipe.  Let's take the the canonical example:&lt;/p&gt;
+
+&lt;pre&gt;
+&lt;b&gt;$ cat a&lt;/b&gt;
+a
+b
+c
+&lt;b&gt;$ cat b&lt;/b&gt;
+b
+a
+&lt;b&gt;$ diff &amp;lt;(sort a) &amp;lt;(sort b)&lt;/b&gt;
+3d2
+&amp;lt; c&lt;/pre&gt;
+&lt;p&gt;To peer under the hood, I used &lt;tt&gt;echo&lt;/tt&gt;.&lt;/p&gt;
+
+&lt;pre&gt;
+&lt;b&gt;$ echo &amp;lt;(echo)&lt;/b&gt;
+/dev/fd/63&lt;/pre&gt;
+&lt;p&gt;Ahah!  The stream gets passed as an argument!&lt;/p&gt;
+&lt;p&gt;So, this opens up a world of possibilities.  Normally you can only work with linear pipelines because the functions or programs only have one input and one output stream, and this limitation has created a dearth of standard utilities for working with multiple input streams.  Before discovering this feature, the command line was like a programming language where functions only accepted one argument (and no implicit partial application, smarty-pants).  Now I feel like I've discovered &lt;tt&gt;bash&lt;/tt&gt;'s secret cow level.&lt;/p&gt;
+&lt;p&gt;So, to remedy the lack of multi-parameter functions in shell, I started by making &lt;tt&gt;xip&lt;/tt&gt;.  It takes any number of file names as arguments and interlaces the lines of their output until one of the streams closes.&lt;/p&gt;
+
+&lt;pre&gt;
+&lt;b&gt;$ xip &amp;lt;(echo 1; echo 2) &amp;lt;(echo a; echo b)&lt;/b&gt;
+1
+a
+2
+b&lt;/pre&gt;
+&lt;p&gt;You can then pipe that to a while read loop, or &lt;tt&gt;xargs -n 2&lt;/tt&gt; loop, to create a table.  This example enumerates the lines of a file (&lt;tt&gt;jot&lt;/tt&gt; for BSD, &lt;tt&gt;seq&lt;/tt&gt; for Linux).&lt;/p&gt;
+
+&lt;pre&gt;
+&lt;b&gt;$ xip &amp;lt;(seq `cat a | wc -l`) a | xargs -n 2&lt;/b&gt;
+1 a
+2 b
+3 c&lt;/pre&gt;
+&lt;p&gt;I suppose the next fun trick is producing multiple output streams, with something like &lt;tt&gt;tee&lt;/tt&gt; and &lt;tt&gt;mkfifo&lt;/tt&gt;.  I leave this as an exercise for the reader.&lt;/p&gt;
+
+
+&lt;hr&gt;
+&lt;p&gt;I've also included some of my older scripts from back in the days when I was working exclusively on Linux and used &lt;tt&gt;mpg123&lt;/tt&gt; to play my music.  &lt;tt&gt;mpg123&lt;/tt&gt; is a command line music player, and it doesn't really have a playlist system built in (for that there are alternatives, but I digress).  So, I used a pipeline to generate my playlist stream.  &lt;tt&gt;cycle&lt;/tt&gt;, &lt;tt&gt;shuffle&lt;/tt&gt;, and &lt;tt&gt;enquote&lt;/tt&gt; are in the github &lt;a href="http://github.com/kriskowal/xbin/tree/master"&gt;~/bin&lt;/a&gt; project.&lt;/p&gt;
+
+&lt;pre&gt;
+&lt;b&gt;$ find . -name '*.mp3' \
+	| cycle \
+	| shuffle `find . -name '*.mp3' | wc -l` \
+	| enquote \
+	| xargs -n 1 mpg123&lt;/b&gt;&lt;/pre&gt;
+</ns0:content><ns0:updated>2009-03-28T14:25:19.262-07:00</ns0:updated><ns0:published>2009-03-28T14:36:00.000-07:00</ns0:published><ns0:title type="text">~/bin</ns0:title><ns0:link href="https://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=8085390981222616685" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8085390981222616685" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8085390981222616685" rel="self" type="application/atom+xml" /><ns1:total xmlns:ns1="http://purl.org/syndication/thread/1.0">0</ns1:total></ns0:entry>

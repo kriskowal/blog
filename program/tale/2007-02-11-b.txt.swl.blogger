@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-6718645616915729951</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;I completely recreated the rider (or stand-alone character) for the Tale sprite graphic.  The major goal was to represent both genders equally in the game.  On the way, I created several hair styles and facial expressions, articulated the arms into three positions for each gender, and created a lot of layers.  Here's the breakdown:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;male or female&lt;/li&gt;
+	&lt;li&gt;round, oval, or angular head&lt;/li&gt;
+	&lt;li&gt;arms out stretched, bent for holding shields and such, or hanging at your sides&lt;/li&gt;
+	&lt;li&gt;shirt with detachable sleeves&lt;/li&gt;
+	&lt;li&gt;pants or shorts&lt;/li&gt;
+	&lt;li&gt;shoes, boots, or sandals&lt;/li&gt;
+	&lt;li&gt;buckler, roman shield, hero shield&lt;/li&gt;
+	&lt;li&gt;long or short, lobed or round ears&lt;/li&gt;
+	&lt;li&gt;11 hair styles&lt;/li&gt;
+	&lt;li&gt;14 facial expressions&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here are a couple samples of riders:&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/tale/2007-02-11/llamacorn-rider-400.png" alt=""&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src="http://cixar.com/~kris.kowal/bdoc/program/tale/2007-02-11/rhino-rider-400.png" alt=""&gt;&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:56:10.502-07:00</ns0:updated><ns0:published>2007-02-11T19:36:00.001-08:00</ns0:published><ns0:title type="text">New Character Sprites</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/6718645616915729951/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=6718645616915729951" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/6718645616915729951" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/6718645616915729951" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2007/02/new-character-sprites_11.html" rel="alternate" title="New Character Sprites" type="text/html" /></ns0:entry>

@@ -1,0 +1,30 @@
+1>Integrating Simile
+
+Not to name names, but I've been working on integrating code from < http://simile.mit.edu/ Simile > from MIT into < https://cixar.com/tracs/javascript Chiron >.  Refactoring an existing JavaScript project highlights all the things you get for free in Chiron.
+
+Simile has it's own XHR engine, DOM event wrappers, DOM layout and style functions, PNG transparency solution, and a <tt>SortedArray</tt> type that provides binary search functions.  Here are some of my observations.
+
+*>
+    Simile's layout <tt>getSize</tt> was better than mine.  I will rectify this.
+    Not having a module system makes us reinvent the wheel: frequently.
+    It's hard to write a good XHR engine.  There are a lot of XHR modules out there, most of them have some issue or another: missing browser, doesn't report OK status on local files, doesn't unify browser caching inconsistencies, doesn't support timeouts, doesn't expose XML (the X in AJAX) in IE, or so on.  If you're going to make a new one, you should use these as references and do some serious research, development, and testing.  Otherwise, you should copy or use the best of them (< http://jquery.com/ jQuery >, in my opinion).  Also, it needs to support asynchronous (the A in AJAX) requests, and you need to use them as often as possible.
+    Not having a solid, modular library makes us lazy.  The inconvenience of name-spacing makes us lazy.  This causes us to write sloppy code.  For example, we should always use an <tt>enquote</tt> function when we're string interpolating HTML attributes and an <tt>inoculate</tt> function when we're interpolating HTML, or we should use DOM functions or a DOM wrapper API to generate our HTML.
+    As I integrate code from other libraries, a pattern emerges.  In my first pass, I collapse the name-spaces.  Every module is a name-space, so all the manual creating of hierarchies like <tt>Simile.DOM</tt> (<tt>Simile = {}</tt> presumed, then <tt>Simile.DOM = {}</tt>, then endless repetition of <tt>Simile.DOM</tt> to augment or use its contents) is unnecessary and undesirable.
+    p>
+        Referencing URL's of resources, like other scripts and images, relative to the URL of the script you're currently in, is hard.  Starting from scratch, this usually means you're going to have a global URL constant.  This means domain-coupling.  Maybe you make the URL relative to the root.  This means domain-coupling.  Maybe you provide it as a configuration variable.  This means site-coupling.  Maybe you scrape the script tags on the page for the URL of your script then resolve the URL relative to your own URL.  This means you're going to write a lot of slow code for what you perceive to be little value.  In Chiron, you can get a function called <tt>resolve</tt> from <tt>http.js</tt> that resolves a URL relative to a base URL.  Chiron also provides your modules with a <tt>moduleUrl</tt> variable that is the URL of the script you're in.  <tt>resolve</tt> also implicitly uses this variable as your base URL if you don't provide a second argument(<tt>include('http.js'); resolve('images/blah.gif')</tt>).
+        Chiron grabs the script tag href of <tt>modules.js</tt> and removes the <tt>script</tt> object from the DOM (so other scripts can't sniff it) exactly once, since it needs that URL to resolve other module URL's.  From there, Chiron keeps track of where all of your modules are relative to it and provides that information to each module.
+    />
+    About <tt>SortedArray</tt>:
+    *>
+        A collection type should create an empty instance if you pass no arguments in.
+        A collection type should populate itself from the values of another collection if you pass one in as its first argument.  This should always be the first argument, even if you frequently create empty collections with overrides on later arguments.  Force your user to pass in a <tt>null</tt> or <tt>undefined</tt>.
+        Try to accept <tt>null</tt> and <tt>undefined</tt> as equivalent unless the distinction is meaningful.
+        Try to distinguish <tt>null</tt> and <tt>undefined</tt> from <tt>0</tt> in all meaningful cases.
+        Invariants like "sorted" are a promise.  Guarantee your invariants across all function calls, including construction.  If this means an unacceptable performance degradation, permit the user to suppress whatever code you need to verify the invariant if they are willing to provide treated data.
+        If there is a reasonable default, it should always be implicit.  I should not have to explicitly send the global <tt>compare</tt> function into a <tt>SortedArray</tt> if I want a <tt>SortedArray</tt> of types supported by <tt>compare</tt>.
+    />
+    Not having a system of base types makes for noisy API's where names from different organizations have different meanings.  For example, <tt>find</tt> functions should always accept the same kinds of arguments and return the same kinds of values.  Simile's name choices are very close to mine, to the effect that they could almost be used as partially implemented duck types for mine, but some of the names would have to be realigned.  <tt>find</tt> in Simile accepts a comparator and returns an acceptable index to insert or remove a particular element.  <tt>find</tt> in Chiron returns an index or key at which an item can be inserted or removed, and guarantees that it will be the first occurrence of a given value (not a comparator).  It was very easy to refactor <tt>SortedArray</tt> to subscribe to the strict model.  Also, <tt>removeAll</tt> needed to be <tt>clear</tt>, <tt>length</tt> and <tt>getCount</tt> both needed to be <tt>getLength</tt>, <tt>getIterator</tt> needed to be <tt>iter</tt>, <tt>next</tt> needed to throw <tt>StopIteration</tt> once in a while, among others.
+/>
+
+I'm looking forward to having a semblance of Simile Timeplot and Timechart in the Chiron family.
+

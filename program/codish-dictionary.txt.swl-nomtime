@@ -1,0 +1,10 @@
+1>Codish Dictionary
+
+In a bout of insanity, I've started cataloging the meanings of about 150 words for the "< /~kris/codish Codish >" vocabulary.  This is the basis for the "Codex" or "Codonomicon".
+
+Codish has two dialects: "Fantasy Codish" and "Legacy Codish".  Fantasy Codish is a coherent vocabulary that sacrifices clarity and comprehensibility for orthogonality.  Legacy Codish favors migrants from existing programming languages by making a more incremental step into the realm of insanity.  The intention is that future generations of programming languages would have a consistent base vocabulary to improve repurposability of generic code and to ease migration among languages.
+
+This dictionary primarily catalogs "Fantasy Codish" since "Legacy Codish" has the same semantic relationships among the names, although their names are less consistent lexically.
+
+My intention is to create a web 2 website that makes this dictionary easy to browse in several novel ways, including "corrections" so you can look up terms from your favorite language and get the corresponding "Codish".  Stay tuned.
+

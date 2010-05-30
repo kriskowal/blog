@@ -1,0 +1,65 @@
+1> Cerny Responds
+
+Robert Cerny wanted to post comments to my < http://cixar.com/~kris/blog/program/javascript/cerny.html "On JSON Validation" > article in which I criticized his choice to have "predicates" return a message when an object does not pass the predicate's criteria.  In lieu of my having not configured a decent comment system for my blog at this time, I offered to post his feedback here.
+
+->>
+
+#>
+It is wrong that there exists a validator system called Cerny.js. Correct is that there exists a JavaScript library by the name of Cerny.js and it contains a "package" CERNY.schema, which allows to validate JavaScript objects against a schema. This means that if the object passes validation, certain statements (covered by the schema) can be considered true for the object.
+In Cerny.js the term "validator" does not exist. I am not a sure, whether we have the same understanding of "validator", but i think your validator is a schema constraint formulated as a function. In a Cerny schema a constraint can also be a literal value, a regular expression or a schema.
+In Cerny.js a functional constraint (validator) is a function that a) returns false or b) returns a string or c) *throws an exception*, if the constraint does not hold. The values undefined, 0 and null do not indicate a constraint violation (validation error), because the check is performed by ===, which does not perform type coercion.
+I chose this form of validators because i wanted them to be like a logical predicate (a function that takes one argument and returns true or false). To make things more convenient, i allowed false to be replaced by a string error message, so that the validation report would be human understandable and the object correctable, without the additional step of consulting the schema. Looking back this might not have been the best of all decisions. Just using exceptions, as you suggest, might have been better.
+p>
+But since i <b>am</b> interpreting exceptions as validation errors, a validateNumber function works just fine. The only restriction being that such a validator cannot return a string value, because this would mean validation error. This is unfortunate, but it can be worked around by
+">
+ function transfromValidatorToPredicate(f) {
+  return function() {
+   try {
+    f.apply(this, arguments);
+    return true;
+   } catch (e) {
+    return e.message;
+   }
+  }
+ }
+/>
+and then
+">var isNumericString = transfromValidatorToPredicate(validateNumber);
+/>
+p>
+Your validateNumber function does not do what its name tells us. It always throws a ParseError. It should therefor be called throwParseError :-). Here is an alternative validateNumber:
+">
+function validateNumber(str) {
+ var value = Number(str);
+ // Check for argument being a str, otherwise false would be mapped onto 0
+ if (typeof str == "string") {
+  if (value &gt; 0 || value &lt; 0) {
+   return value;
+  }
+  if (str == "0") {
+   return 0;
+  }
+ }
+ throw Error("Not a number");
+}
+/>
+/>
+/>
+
+Kind regards,
+Robert Cerny
+
+->>
+
+In response,
+#>
+I did overlook the rest of Cerny.js when reviewing the design for the JSON schema validator.  My appologies for that oversight.
+As a matter of semantics, I consider validators a subclass of predicates.  A validator is a predicate that discerns whether an object is valid or invalid.  Predicates and constraints, I believe, are conceptually equivalent, or a contstraint is a part of a predicate and can be a predicate recursively.  Predicates, constraints, and validators are relations, and as such are most generally representable as functions.  Accepting regular expressions, literals, and schemas as predicates is a design choice that departs from the functional purity of the design in favor of syntactic brevity.  A predicate usually takes an explicit subject, verb, and object where the subject and object are optional depending on the verb.  Your deign reduces orthogonality by infering that a literal is a predicate with a verb of "equals", a regex is a predicate with a verb of "matches", and a schema corresponds with a verb of "validates".  Given that literals, with the exception of functions, are not likely to be confused with predicates, I think that it's a good choice to make these inferences.  I also think it would be good design to make all predicates functions, albeit via coercion, so that you get more orthogonality, reusability, and simplicity.
+I had assumed you used non-strict equality since it would implicitly handle both false and strings thus making your code path more simple.  My appologies again for the assumption.
+p>
+I'm glad you concur that it might have been simpler to not collapse the error messages to return values.  That was my thesis.  I also sympathize with the design trade-off.  I would have chosen to force my users to type "throw Error()" and I'm sure that not all of them (so far, just my alternate personalities) would appreciate it.
+Obviating the need for a conversion function from validator function to predicate is exactly the kind of glue I'd prefer to avoid.
+Also, my appologies for the formatting error in my original post.  My conditional was obscured since it contained &lt; and &gt; which hadn't been escaped.  Also, thank you for pointing out the type safety improvements.
+/>
+
+Kris

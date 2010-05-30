@@ -1,0 +1,30 @@
+1>Getting Started Developing Cixar Python, Swil, Ish, Chiron, or Tale
+
+This article is aimed at people who have or aspire to have an account on Cixar and would like to contribute back to Cixar projects or run scripts with project interdependencies on other Cixar projects at a Unix command line.  So, if you just want to deploy a web site using Chiron Javascripts, this article may be indirectly helpful but you are not in the target audience.  However, if you are developing Javascript using Chiron, you might find it useful to get on a Unix box and check out some of the other projects so that you can generate API documentation from your scripts.  Otherwise, this article is for developers of the noted projects.
+
+These Cixar projects have a lot of interdependencies.  Chances are, if you're working on one project, say Chiron, you will eventually need to have another Cixar project, like Cixar Python, or Ish.  I've arranged Cixar projects so that these growing dependencies can eventually be met by installing their corresponding deployed packages (of which none exist), but for the time being you will need to check out their development code from Subversion.
+
+I've developed a directory layout that's flexible enough to permit a developer to checkout the project they're interested in and then check out other projects, as needed, in that project's <tt>bin</tt> directory.  However, since interdependencies arise, for my personal use, I have a central <tt>cixar</tt> project directory into which I create symbolic links from each project's <tt>bin</tt> directory.  Since this is the simplest, single configuration and since I do not intend to write an article for every project, here's how to set up project roots for Cixar Python, Swil 3, Ish, Chiron, and Tale.
+
+First, check out the project root root, Cixar Python, as <tt>cixar</tt>.  You can do this with the command <tt>svn co https://cixar.com/svns/python/cixar</tt>.  This directory would correspond to <tt>/usr/lib/pythonX.X/site-packages/cixar</tt> on a system with any of these Cixar packages installed.  This directory helps other Cixar projects find each other by importing the <tt>cixar</tt> Python module and looking at its fully qualified <tt>__file__</tt> attribute.  The package also includes the <tt>cixar.python</tt> modules which contains general Python utilities for all of the projects, like stripping comments, ignoring blank lines in text, modeling anything modal as a stack of modes, memoization, rendering object representations as XML HTML, and so on.
+
+From there, check out your project of interest in that directory.
+">
+ ~$ svn co https://cixar.com/svns/python/cixar
+ ~$ cd cixar
+ cixar$ svn co https://cixar.com/svns/swil
+ cixar$ svn co https://cixar.com/svns/ish
+ cixar$ svn co https://cixar.com/svns/javascript # Chiron
+ cixar$ svn co https://cixar.com/svns/tale
+/>
+
+Each of these projects has a <tt>bin</tt> directory.  The idea is that when you execute Python scripts at the Unix prompt, they implicitly add the directory that the script is in to the Python library path.  So, to make the development versions of these other projects available to each other as Python packages, add a symbolic link to the <tt>bin</tt> directory to your <tt>cixar</tt> directory.
+
+">
+ cixar/javascript/bin$ ln -s ../.. cixar
+/>
+
+And that's all you need to do.  If in the course of executing programs in a project's <tt>bin</tt> directory you run into a module import exception, just check out the referenced project with one of the check out commands noted above.
+
+Season to taste.
+

@@ -1,0 +1,107 @@
+1> Javascript Functions, Accelerated Introduction
+
+In Javascript, functions don't really have intrinsic names.  The name is just a variable you've assigned an anonymous function object to.
+">
+ function a () {}
+ /* is the same as */
+ var a = function () {};
+/>
+
+You can tell a function that it should use some other object as "this".
+">
+ var egg = new Egg();
+ var weasel = new Sweater();
+ egg.break.call(weasel);
+/>
+
+You can also send any number of arguments to the function, even if it doesn't ask for them.  Then, inside the function, you can get at all the extra arguments with the <tt>arguments</tt> variable.
+">
+ (function (a, b) {
+  assert(a == 10);
+  assert(b == 20);
+  assert(arguments[1] == 20);
+  assert(arguments[2] == 30);
+ }).call(this, 10, 20, 30);
+/>
+
+You can send arguments to a function from an <tt>Array</tt>.
+">
+ (function (a, b, c) {
+  assert(a == 1);
+  assert(b == 2);
+  assert(c == 3);
+ }).apply(this, [1, 2, 3]);
+/>
+
+You can even make up an array of arguments with a program.
+">
+ var array = [1];
+ array.push(2);
+ assert(array == [1, 2]);
+ var sum = function (a, b) {
+  return a + b;
+ }
+ assert(sum.apply(this, array) == 3);
+/>
+
+You don't have to give a function all of the arguments it asks for.
+">
+ (function (a, b, c) {
+  assert(a == 10);
+  assert(b == 20);
+  assert(c == undefined);
+ })(10, 20);
+/>
+
+You can run programs/recipes that you get as quoted data.
+">
+ eval("var a = 10; a = a + 1");
+/>
+
+When you <tt>eval</tt>, you can see all the data in the caller's closure.
+">
+ var a = 10;
+ eval('a = 20');
+ assert(a == 20);
+/>
+
+An interesting thing about putting Javascript in HTML is that all of the scripts have the same closure.
+">
+ &lt;script&gt;
+  var global = true;
+ &lt;script&gt;
+ &lt;script&gt;
+  assert(global);
+ &lt;script&gt;
+/>
+
+You can wrap a bit of code in a closure so that its names are all its own, can't conflict with other scripts.
+">
+ var global = true;
+ (function () {
+  var local = true;
+ })();
+ /* local is not visible here */
+/>
+
+In a web browser, the context object for the entire program is the <tt>Window</tt> object containing the script.
+">
+ assert(this == window);
+ (function () {
+  assert(this != window);
+  assert(this == 10);
+ }).call(10);
+/>
+
+The window is also the base closure for your program, so you can access everything in it as if it were a local variable.
+">
+ window.document == document
+/>
+
+You can play this trick with any object's member data or functions using the <tt>with</tt> block.
+">
+ with ({'a': 10}) {
+  assert(a == 10);
+ }
+/>
+

@@ -1,0 +1,121 @@
+1> JSON Basics
+
+< http://json.org JSON > is a strict subset of JavaScript, particularly a subset of its object-literal notation, discovered and specified by < http://www.crockford.com/ "Doug Crockford" >.  The subset is sufficient to make the creation of parsers and formatters in various languages nearly trivial, while completely trivializing the process of parsing the notation in a web browser.
+
+Object-literals in JavaScript are very similar to their analogs in many other languages, like Perl, Python, and even AppleScript.  The notation provisions text strings, numbers, booleans, and the literal <tt>null</tt> for all elemental (scalar) data.  Then the notation provides Arrays for ordered values and Objects for unordered, unique, string-to-anything key-value-pair mappings.  With these types, you can express most hierarchical data easily.
+
+">
+ 10
+ 3.1415
+ "a"
+ true
+ false
+ null
+ [1, 2, 3]
+ {"a": 10, "b": 20}
+ [{"a": 10}, {"a": 20}]
+/>
+
+JSON makes a couple simplifications even on JavaScript's object literal grammar.  These make it even easier to write parsers and formatters.
+#>
+    a JSON expression contains no new-line characters.
+    all strings, including keys in objects, are enquoted between double quotes.
+/>
+
+JSON joins the ranks of many other markup languages that we can use <abbr title="split infinitives are cool">to easily transfer</abbr> data among web servers, but its primary function is as a common data interchange language between web browser clients and web servers hosted in the numerous languages of the web.  JSON is well adapted for this space because it can take advantage, through various channels, of every web browser's fast, built-in JavaScript interpreter.
+
+There are two flavors of JSON services with subtle differences for both clients and servers.  One is JSON proper, which I will call XHR JSON because it uses an XML HTTP Request.  The other is called JSONP or "JSON with Padding".  You would use one, the other, or neither based on security and performance concerns.
+
+2> XHR JSON
+
+XHR JSON uses a feature that exists in one form or another in all modern web-browsers, called an XML HTTP Request, and a function in JavaScript that lets you evaluate arbitrary text strings as JavaScript programs, called <tt>eval</tt>.  With an XML HTTP Request, the client can make an HTTP Request to any URL on the same domain as the hosting page.  This constraint is called the "Same Origin Policy".  Unfortunately, the policy is in many cases not sufficient to isolate vulnerability to paths of a particular domain, nor to prevent cross site scripts from using the data (more on that later).  Whether the security mechanism is effective or not is a longer and later discussion.  The point being that this mechanism is the crux of your choice between XHR JSON and JSONP.
+
+With an XHR, you request plain text from a URL on the same domain as your page, then you evaluate it as a JavaScript program.  Performing a cross-browser compatible XML HTTP Request isn't trivial in itself, so let's assume that I'm using a library that provides an <tt>xhr</tt> function that synchronously (blocks) until an HTTP request is complete and returns the content of the HTTP response as a String.  There are other variations on <tt>xhr</tt> for asynchronous requests and grabbing XML.
+
+">
+ var text = xhr("/some.json");
+ var json = eval(text);
+/>
+
+In this case, the "/some.json" contains unadulterated JSON.  However, because your JSON is likely to be an Object like <tt>{"a": 10}</tt>, we need to make a special arrangement.  A JavaScript program that is merely an <tt>Object</tt> literal would be mis-parsed initially as a code block.  For this reason, we must force the JavaScript parser into expression context instead of statement context.  For this reason, we wrap the JSON string in parentheses or assign it to a variable.
+
+">
+ var text = xhr("/some.json");
+ var json = eval("(" + text + ")");
+/>
+
+I prefer parentheses because I haven't, in my fallible memory, encountered a browser that supported XHR but wasn't standards compliant enough for the <tt>eval</tt> function to return the value of the last evaluated expression.
+
+When you use an XHR to grab JSON, you are vulnerable to the host, depending on it to not give you an alternate JavaScript program that insidiously evaluates to the same data.  For that reason, a lot of JSON libraries engage in the slower and dubious attempt to validate the JSON before evaluating it with a regular expression.  The bottom line is that you're vulnerable to your server when you use <tt>XHR</tt> and <tt>eval</tt>.
+
+That being said, it's better to get an exception early than an untraceable error later.  For that reason, attempting to validate JSON is a good idea.  There's another one: variable laundering.  The <tt>eval</tt> function inherits the calling context's scope chain.  This means that the server can read and alter any variables on your scope chain.  I use an <tt>evalGlobal</tt> routine to launder my scope chain.  This doesn't give security all by itself, but it could help lead to a secure system down the way and can turn a bunch of silent name resolution errors or data leaks into thrown <tt>NameError</tt>s.
+
+">
+ (function (evalGlobal) {
+  var text = xhr("/some.json");
+  validateJson(text);
+  var json = evalGlobal("(" + text + ")");
+  ...
+ })(function () {
+  return eval(arguments[0]);
+ })
+/>
+
+I'll give a detailed explanation of <tt>evalGlobal</tt> in another article.  For now, suffice it to say, this is much more elegant than using a variable to capture the JSON value, although it is possible:
+
+">
+ var text = xhr("/some.json");
+ var json;
+ eval("json = " + text);
+/>
+
+
+2> JSONP
+
+JSONP is different than XHR JSON in both the way the server hosts the data and in the way that the client consumes it.  On the client side, the user adds a <tt>&lt;script&gt;</tt> tag to their own page.  The source of the script is the URL of a server side program with the name of a callback function that the client places in global scope sent as a query argument.
+
+">&lt;script src="http://other.com/some.jsonp?callback=foo"&gt;
+
+The client script arranges to receive parsed and evaluated JSON data asynchronously by adding a <tt>foo</tt> method to the global scope, the <tt>window</tt> object.
+
+">
+ window.foo = function (json) {
+  ...
+  delete window.foo;
+ };
+ var script = document.createElement('script');
+ script.src = "http://other.com/some.jsonp?callback=foo";
+ document.getElementsByTagName('head').appendChild(script);
+/>
+
+When you add a <tt>script</tt> tag to your document, browsers are kind enough to notice and automatically send an HTTP request to fetch the request JavaScript program.  In this case, your page trusts the script on <tt>other.com</tt> to return a JavaScript program that will call your "foo" function and pass it some JSON data.
+
+">
+ foo({"a": 10});
+/>
+
+With JSONP, the client is vulnerable to the remote server because it can opt to write an arbitrary JavaScript program before calling <tt>foo</tt>, if at all.  So, you should only use JSONP to request data from domains that you trust.
+
+Also JSONP is slower and less responsive to errors than XHR JSON can be.  The only signal that you receive as to the progress or status of a JSONP request is whether your callback gets called in a timely fashion.  XHR JSON is preferable in all situations where it is possible and it may even make sense to create a proxy to the other domain from your same domain server.  Using a proxy also gives you an opportunity to validate the JSON on the server-side, where computation time is cheap.
+
+
+2> Same Origin XHR JSON
+
+There's another trick with XHR JSON, and I'm not sure what scenarios require it.  Some people can use the JSONP technique to fetch JSON from a foreign domain.  These folks can't send HTTP headers or cookies, and they never get an opportunity to alter the text of the HTTP request before it's evaluated as JavaScript in their browser.  I would think that it would be sufficient to prevent an other domain client from intercepting sensitive data for the server to require an authenticated token in the HTTP request, as can be provided by an XML HTTP Request but not a JSONP request.  However, some crackers can attempt to get data from your service by using JSON data in a cross site script, much like JSONP.  However, instead of using a callback, these crackers arrange to override the <tt>Array</tt> or <tt>Object</tt> constructors and thus can monitor and transmit snippets of JSON constructed by simply evaluating JavaScript object literal notation.  This technique can be prevented by padding your XHR JSON service with an infinite loop.
+
+">
+ while (1);
+ {"a": 10}
+/>
+
+In this case, your client conspires with the server, and since it does get a chance to intercept and modify the text of the JSON, it strips the known number of characters for the while loop before evaluating it.
+
+">
+ var text = xhr("/some.json");
+ var json = evalGlobal("(" + text.substring("while (1);".length) + ")");
+/>
+
+What baffles me is that, unless you've secured your JSON with an authentication token, any server capable of making HTTP requests and parsing JSON could do the same thing.  Malicious clients are not required to use web browsers.  The only situation where this might occur would be if the cracker had compromised your client already, had your authentication token, and needed your browser to make a cross domain JSONP request on its behalf.  That could not be the case since the server would have no reason to give an XHR JSON authentication token to a client that could only fetch data with JSONP.  That point is even moot since, going back, the cracker has already compromised your client and might as well use XHR JSON with all the same rights as you on even the same origin.
+
+That being said, I noticed that GMail used this technique, so I assume there's substance to it.  Perhaps someone will clarify in the comments.
+

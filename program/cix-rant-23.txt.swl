@@ -1,0 +1,10 @@
+1>Cix Rant 23
+
+Let's be clear about at least one thing. Right is affirmative. Left is negative. This means the "enter" key is on the right; the "escape" key is on the left (the exact opposite left, horizontally orthogonal to the enter key, where the caps lock isn't). The "Ok" button is on the right; the "Cancel" button is on the left. Sidescroller games go from left to right. Forms do the same. New panels appear on the right; old panels disappear to the left. Right is deeper in the file system; left is higher.
+
+Commands are on the bottom. Status is on top. This means command lines are on the bottom. Command buttons are on the bottom. Toolbars are on the bottom. Menus are on the bottom. Location bars are on the bottom. Titles are on top. Status bars are on top. The date and time are on top. Progress notifications are on top. Cursor location information is on top. If it's imperative, it goes on the bottom. If it's functional, stateless, or informational, it goes on the top.
+
+The newest stuff is on the bottom. Moving up, stuff gets older. This means that what your buddy said last is at the bottom of the message buffer. This means recent command output is on the bottom of a message buffer. This means modal notifications are on the bottom (like security warnings, notification bubbles). This means the most recently received email is on the bottom. 
+
+Let's get serious about consistent, easy, simple and learnable human user interfaces people.
+

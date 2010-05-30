@@ -1,0 +1,19 @@
+1>Licensing Swil
+
+I finished my < /~kris.kowal/bdoc/program/licensing-swil.pdf "term paper" > [pdf] for Professional Responsibilities (ethics in software development, Cal Poly CSC 300).  Here's the abstract:
+
+:>
+    <ul>
+    Software developers have a gamut of options for software licensing.
+    These options range from propriety to permissiveness, including many
+    open source options. This article introduces the attributes and categories
+    of common licenses and presents their strengths and weaknesses. There
+    follows an analysis of how each license attribute and licensing model would
+    serve the author, the public, and authors of derivative works. In particu-
+    lar, this article addresses the licensing needs of a programming language
+    called Swil. The article concludes that a dual licensing scheme including
+    a commercial license and a viral free software license would provide the
+    best compromise for all parties.
+    </ul>
+/>
+

@@ -1,0 +1,114 @@
+1> Re: Recommendations for the Fourth Edition of the ECMAScript Programming Language Specification
+
+< http://www.crockford.com/ "Doug Crockford" > has posted some < http://javascript.crockford.com/recommend.html recommendations > to improve JavaScript.
+
+I have some comments in the context of my experience with live-patching JavaScript issues with libraries.
+
+
+2> New Features
+
+3> Function Reflection
+
+Doug recommends that function objects contain a "name" property.  Some versions of JavaScript actually have this already.  This could be handy but I haven't needed this and would not be likely to use it.  I was surprised that FireFox had this when I used a <tt>Function</tt> in a <tt>with</tt> block.  I've learned my lesson.
+
+However, Doug also recommends the addition of an <tt>arguments</tt> member to <tt>Function</tt> objects.  This is a critical feature.  The <tt>arguments</tt> array would contain the names of all of the functions declared argument variables.  <tt>Function</tt> objects already have a <tt>length</tt> member that corresponds to the length of this hypothetical <tt>arguments</tt> array.  There was some < http://ejohn.org/blog/javascript-method-overloading/ "buzz" > about using this value for method overloading and it permitted me to create an elegant < https://cixar.com/tracs/javascript/browser/trunk/src/base.js?rev=328#L1437 "partial application decorator" >.  If we had access to the names of a function's argument declarations, I could implement a decorator for supporting Python-style positional and named arguments.  Decorated functions would accept an array/list of positional arguments and an object/dict/map of keyword arguments and the decorator would translate them to an array for a wrapped <tt>Function.apply</tt>.  That decorator or further decorators could support default values and automatic argument length assertions.
+
+3> <tt>typeOf</tt>
+
+Doug notes that JavaScript's <tt>typeof</tt> "function" is broken because it returns the wrong strings for <tt>null</tt> and arrays.  All that and he hints that using camelCase instead of lowercase would have been more in keeping with the language's aesthetic.  He recommends that we deprecate <tt>typeof</tt> and replace it with a fixed version called <tt>typeOf</tt>.  I would go a step further.  <tt>typeof</tt> returns a string.  I propose that it ought to return the type object.  This would jive well with <tt>instanceof</tt>, <tt>instanceOf</tt>, or <tt>isInstance</tt>.  This means there should be a <tt>Null</tt> type that would construct <tt>null</tt> and an <tt>Undefined</tt> type to construct <tt>undefined</tt>.
+
+2> Object Methods
+
+3> Don't Enum
+
+I don' particularly care whether <tt>Object</tt> has a <tt>dontEnum</tt> method since I don't augment base types and wrap them when I need reliable collection types, but this would help ameliorate integration woes with prototype so it's a good idea.
+
+3> Array of Keys
+
+Doug wants a <tt>Object.arrayOfKeys</tt> method.  I want a <tt>keys</tt> method that returns a <tt>Set</tt>.  I would also like <tt>keysIter</tt> and, less emphatically, <tt>keysArray</tt>.  I don't want the name <tt>arrayOfKeys</tt> because it introduces an unnecessary <tt>Of</tt> and doesn't sort as well as <tt>keys*</tt>.
+
+3> Array of Values.
+
+Doug also wants <tt>Object.arrayOfValues</tt>.  I want <tt>values</tt> and <tt>valuesIter</tt>.  These should return <tt>Array</tt> and <tt>Iter</tt> object respectively.
+
+3> toJsonString
+
+<tt>Object.toJSONString(memberName)</tt>.  The first thing that comes to mind to improve this idea is to rename it <tt>toJsonString</tt>; I prefer to consider acronyms words and I would have also called <tt>XMLHttpRequest</tt> <tt>XmlHttpRequest</tt>.  This name jives well with <tt>toString</tt>, but I would have called that <tt>string</tt>.  But, I actually would call this <tt>repr</tt> and made it a global function.  <tt>repr</tt> would work on arbitrary objects, a subset of which would be serializable JSON.  The behavior of <tt>repr</tt> would be overridable by providing a <tt>repr</tt> method on an object.
+
+
+3> Beget Object
+
+Doug recommends that Prototype inheritance be a little more lucid by providing a <tt>beget</tt> function that returns a new, empty <tt>Object</tt> that inherits from the previous.  I like this idea.  I called it <tt>inherit</tt> in Chiron.
+
+3> <tt>isEmpty</tt>
+
+<tt>isEmpty</tt> would return whether an object has any properties, other than those inherited.  Sounds fine to me, although I probably would have just used number and boolean casting.  This is a good idea too though, because in JavaScript, it's hard to distinguish an Object that is being used as the base of the inheritance tree and an Object that is being used as a hash-map.  To that end, I recommend the addition of a <tt>Map</tt> type.  <tt>Map</tt> would have <tt>isEmpty</tt>, <tt>number</tt>, and <tt>boolean</tt> functions and would implicitly cast to <tt>Number</tt> and <tt>Boolean</tt> based on their <tt>length</tt> that would be reflected publically by the <tt>getLength</tt> function.
+
+3> Array Methods
+
+Doug recommends the addition of some of Mozilla's JavaScript 1.6 Array methods.  I support all of them.  However, some nomenclature refinements and specifications:
+
+<tt>indexOf</tt> should be augmented by a <tt>find</tt> function that throws a <tt>KeyError</tt> instead of returning a negative index.
+
+<tt>lastIndexOf</tt> should be augmented by a <tt>findLast</tt> function similar to <tt>find</tt>.
+
+<tt>every</tt> should be called <tt>all</tt>.  This function should accept an iterator or iterable and short circuit on the first failure.
+
+<tt>filter</tt> should be called <tt>where</tt>.  Filtering implies the opposite of finding.  To filter something is to remove it from a stream if it passes a particular condition.  <tt>where</tt> implies that the outgoing stream should contain only those elements from the original stream that affirm the guard.
+
+<tt>forEach</tt> is good as is.  I would like to specify that it should return <tt>this</tt> so that <tt>forEach</tt> calls can be chained.  This has implications on iterations that are partially consumed by a <tt>forEach</tt> call that throws a <tt>StopIteration</tt> exception in its continuation.
+
+<tt>map</tt> is good as is. As a member of an array, <tt>each</tt> should be a synonym. These functions should also be declared in global scope with opposite argument order: <tt>map(function, collection, [context])</tt> vs <tt>each(collection, function, [context])</tt>.
+
+<tt>some</tt> should be called <tt>any</tt>.  This function should accept an iterator or iterable and short circuit on the first success.
+
+
+3> String Methods
+
+<tt>trim</tt> is good as is.  There should also be <tt>trimBegin</tt> and <tt>trimEnd</tt> or <tt>trimFirst</tt> and <tt>trimLast</tt>.
+
+<tt>string.eval</tt> is a good idea, but I've got my own ways to launder the scope chain for <tt>eval</tt>.
+
+3> Date Methods
+
+<tt>Date.toJSONString</tt> and <tt>Date.toISOString</tt> are both great ideas; not having them has been a problem for me in the past.  I recommend calling them <tt>toJsonString</tt> and <tt>toIsoString</tt>.
+
+2> Corrections
+
+3> Reserved Words
+
+Doug argues that identifiers in object literal notation and member dot notation should allow reserved words.  I concur.  It's a small syntax shortcut that identifiers used in member selection and object literal notation are not required to be enquoted; the language should be equally permissive for both syntax forms.
+
+Doug also argues that the list of reserved words is too long.  I have mixed feelings.  On one hand, having a long list of reserved identifiers leaves open the door for future advances in the language (some of which include type annotations, which I find dubious).  On the other hand, they muddy the name space for current code.  On the latter note, it's important that all browsers are equally strict.  Safari, at the moment, is much more strict than other browsers, so I've been surprised.
+
+2> Object Literal Notation
+
+I agree that commas should be more regular throughout the language.  They should be permitted after any value, including the last in an Object or Array literal without affecting the length of either.
+
+
+2> <tt>arguments</tt>
+
+<tt>arguments</tt> should definitely be an instance of an <tt>Arguments</tt> type that inherits from <tt>Array</tt>.
+
+2> Inner Functions and the Context Object (<tt>this</tt>)
+
+I agree that <tt>this</tt> should not be the global object (<tt>window</tt>) in inner or anonymous functions.  <tt>this</tt> should be acquired from the scope chain in such closures.  Doug claims that this is not the standard.  I recall being corrected on this point, but I also recall having been under the same impression.  I leave this as an exercise to the reader to determine the current state of affairs in various browsers.
+
+2> Tail Recursion
+
+Tail recursion would be nice.
+
+2> Deprecation
+
+Primitive wrappers should be eliminated.  Boxing is almost never necessary.  In fact, the use of the <tt>new</tt> keyword could be completely obviated and code would become much more reusable since there would be no distinction between a factory method and an object constructor.
+
+I actually use the <tt>with</tt> statement in a couple cases that are really important.  I don't recommend using it for its designed purpose, but I really do need it to stay in the language for my module system and my JavaScript shell to keep working.  FireBug, in particular, depends on this feature.
+
+Semicolon insertion was silly.  Off with its head.
+
+I don't particularly care about <tt>arguments.callee</tt>.
+
+<tt>typeof</tt> has to go.
+
+Again, <tt>eval</tt> is a necessary part of my perverse world.  I can do my own laundry.  There are, however, irresponsible uses of <tt>eval</tt> that I do not condone.
+

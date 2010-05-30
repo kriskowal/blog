@@ -1,0 +1,73 @@
+1>Javascript Module Loader
+
+I had an epiphany when writing a module loader.  The trouble is that I didn't want modules to have access or ability to mess with the module loader's local variables.  Since I was just calling <tt>eval</tt> with the text of the module, it had all of this access for reading and writing.  Since I don't trust even myself, this was not acceptable.  The problem was finding a way to sweep all the names under the carpet.
+
+Here's the trivial solution:
+">
+ (function () {
+  /* module loader */
+  this.require = function (url) {
+   var require = function (url) {
+    /* this require is for the module */
+   };
+   var text = http.requestText(url);
+   eval(text);
+  }
+ })();
+/>
+
+Here's a less naive solution:
+">
+ var evalModule = function (text, require) {
+  eval(text);
+ };
+ (function () {
+  this.require = function (url) {
+   var text = http.requestText(url);
+   var require = function (url) {};
+   evalModule(text, require);
+  };
+ })()
+/>
+
+That solution still leaves <tt>evalModule</tt> as a variable that the module could potentially supplant.  I needed to isolate <tt>evalModule</tt>.  My solution uses a member variable of a <tt>jail</tt> object which eventually gets populated with the <tt>evalModule</tt> function without giving the closure access to either <tt>jail</tt> or itself..
+
+">
+ (function () {
+  var jail = {};
+  this.require = function (url) {
+   var text = http.requestText(url);
+   var require = function (url) {};
+   evalModule(text, require);
+  };
+  return jail;
+ })().evalModule = function (text, require) {
+  eval(text);
+ }
+/>
+
+Of course, it's not enough to isolate the module in a closure.  I also give it a <tt>Module</tt> object as its context object.
+">
+ (function () {
+  var jail = {};
+  this.require = function (url) {
+   var text = http.requestText(url);
+   var require = function (url) {};
+   var module = new Module(url);
+   evalModule.call(module, text, require);
+  };
+  return jail;
+ })().evalModule = function (text, require) {
+  eval(text);
+ }
+/>
+
+So, modules look like this:
+">
+ var module = this;
+ assert(this != window);
+ with (require('module.js')) {
+  /* go do stuff without fear of name collisions */
+ }
+/>
+

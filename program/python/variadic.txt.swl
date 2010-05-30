@@ -1,0 +1,46 @@
+
+1> Variadic Positional and Keyword Arguments - The Python Saga - Part 1
+
+Python supports "variadic" arguments.  Variadic arguments are the man behind the curtain for C's <tt>printf</tt> function.  The idea is that a function can accept a variable number of positional arguments, the values to put in your format string.  In C this is accomplished with an ellipsis, <tt>...</tt>, and some <tt>VA</tt> macro-linked-list-stuff that I always have to look up.  Python goes a couple steps further with variadic arguments and the results are stunning, orthogonal, and <i>actually useful</i> almost every day.  With Python, you get both "positional" arguments, like C, and keyword arguments: those arguments that conceptually map, in any order, to the names of the arguments in your function's declaration.  The magic symbols are "*" and "**" for positional and keyword arguments respectively.  With one "*", you can declare a function that accepts any number of arguments as the declared list object:
+
+">
+ def foo(*args):
+  return args
+ assert foo(1, 2, 3) == [1, 2, 3]
+/>
+
+You can also pass an array of positional arguments to a function with very similar syntax:
+
+">
+ def foo(a, b, c):
+  return [a, b, c]
+ assert foo(*[1, 2, 3]) == [1, 2, 3]
+/>
+
+And you can do the same thing with keyword arguments except you use dictionaries:
+
+">
+ def foo(**kwargs):
+  return kwargs
+ assert foo(a = 10, b = 20, c = 30) == {'a': 10, 'b': 20, 'c': 30}
+/>
+
+Likewise, you can pass keyword arguments:
+
+">
+ def foo(a, b, c):
+  return [a, b, c]
+ assert foo(**{'a': 10, 'b': 20, 'c': 30}) == [10, 20, 30]
+/>
+
+You can use them in combination, along with default arguments to provide beautiful, orthogonal, reusable abstractions:
+
+">
+ def foo(a, b = None, c = None, d = None):
+  return [a, b, c, d]
+ assert foo(*[1, 2], **{'c': 3}) == [1, 2, 3, None]
+ def bar(a, b, c, *args, **kws):
+  return [a, b, c], args, kws
+ assert bar(1, 2, 3, 4, 5, f = 6) == ([1, 2, 3], [4], {'f': 5})
+/>
+

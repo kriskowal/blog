@@ -1,0 +1,144 @@
+
+1>Writing and Using Centauren Javascript Modules
+
+:>
+	<table width="250" align="right" class="aside" style="background-color: white; margin-left: 10px; margin-right; -5px;">
+		<tr><td><img src="/~kris.kowal/bdoc/program/javascript/chiron.png" alt="Chiron the Centauren"/></td></tr>
+		<tr><td>< http://en.wikipedia.org/wiki/Chiron Chiron >, the Centauren, mentor of Achilles and Ajax, taught that one ought think like a man, fight like a beast, eat like a pig, and digest with five modular stomachs.  In the Greek mythos, Chiron traded his immortality to free Prometheus from the perpetual woe of Internet Explorer.  This recently excavated bass relief is a rare Hellenic depiction of Chiron in his true, bovine majesty.</td></tr>
+	</table>
+/>
+
+There are scarce innovations in Tale's, "Chiron", Javascript library.  However, its heart is an advanced module system, the likes of which we have not yet seen.  In this brief article, I will introduce the use and creation of Chiron modules.
+
+Chiron strives to provide parallels with Python.  So, like their parselmouthe analogs, Chiron modules are singleton objects, loaded from a file on demand.  They load once and are thereafter available to all other modules.  Chiron modules free the developer from worries about package dependencies and global name space conflicts.
+
+You can load the Chiron module system by loading the <a href="https://cixar.com/svns/javascript/"><tt>modules.js</tt></a> (15KB shrunk) Javascript file in your HTML.  <tt>modules.js</tt> augments the global name space (usually the <tt>window</tt> object) with a <tt>chiron</tt> object and therein provides only one function, <tt>require</tt>.  This minimal footprint means that you can use Chiron alongside any other Javascript library, although all of these libraries can benefit from encapsulation in Chiron modules and consolidation of common functions.	For the price of 15KB, Chiron also loads the rudiments of <tt>environment.js</tt> for common sniffing, <tt>http.js</tt> for AJAX and URL stuff, and <tt>browserBase.js</tt> for cross-platform DOM and layout on which it depends.
+
+The <tt>chiron.require</tt> function, available as just <tt>require</tt> within modules, accepts the URL of a Chiron Javascript module relative to <tt>modules.js</tt> and returns the corresponding <tt>Module</tt> object.
+
+:><br clear="right"/>
+">
+ &lt;script src="modules.js"&gt;&lt;/script&gt;
+ &lt;script&gt;
+  var environment = require('environment.js');
+ &lt;/script&gt;
+/>
+
+<tt>require</tt> also has a form that passes the <tt>Module</tt> to a call-back.  This is like "continuation passing style" for the esoteric languages people.
+
+">
+ require('environment.js', function (environment) {
+ });
+/>
+
+By the way, I'm going to assume you know about < http://www.google.com/search?q=javascript+anonymous+functions+tutorial "anonymous functions" >.
+
+The module object is a plain old Javascript <tt>Object</tt> that the script file populates.  When you require a module, Chiron does not merely add that file to the list of scripts in your head block, nor does it merely grab the modules text, load its dependencies and then <tt>eval</tt> the text.  Yes, Chiron grabs the text of the script using an HTTP request.  However, Chiron carefully crafts the closure and context of your module's evaluation.  You can imagine that your module is being run inside this block:
+
+">
+ with (module) { /* 1 */
+ with (moduleContext) { /* 3 */
+ (function () { /* 4 */
+
+ /* you are here */
+ this.name = "foo" /* 2 */
+
+ }).call(module); /* 5 */
+ }} /* end of withs */
+/>
+
+Some explanation is in order.  Skip to the next paragraph for an explanation of the <tt>with</tt> block.
+
+#>
+	Inside your module, you can use any of the names you define in the module without explicating the module object.
+	You still have to augment the context object to add names to your module though.
+	Inside your module, you get all the methods and data provided for free by <tt>modules.js</tt>, which include:
+	*>
+		<tt>require</tt> gets a module object based on its URL relative to <tt>modules.js</tt>.
+		<tt>requireRelative</tt> gets a module object based on its URL relative to the <b>current</b> module's URL.  How about that folks: movable modules.
+		<tt>register</tt> can be ignored for now.
+		<tt>registerRelative</tt> also ignored for now.
+		<tt>log</tt> writes a message to your console.	This can be < http://getfirebug.com Firebug > in < http://getfirefox.com Firefox > or Safari's Javascript debug console (and just because this should be written on the inside of your skull, <tt>defaults write com.apple.Safari IncludeDebugMenu true</tt>).
+		<tt>info</tt> logs information.
+		<tt>warn</tt> logs warnings.
+		<tt>error</tt> logs errors.
+		<tt>report</tt> accepts an object and a key and logs the key and its value in the object, just for convenience.
+        <tt>moduleUrl</tt> the URL of the current module.
+	/>
+	Your module is evaluated inside a closure, so you can safely use <tt>var</tt> to declare variables that are local and private.
+    The module is evaluated with the <tt>Module</tt> object as your context object.  <tt>module</tt> is not a variable available inside your module even though this example would seem to imply that.  Your module is safely evaluated inside an <tt>evalJail</tt> (a sandbox, if you will) that does not expose any of the module system's internal names.  You really only get <tt>window</tt>, anything inside <tt>window</tt>, the module as <tt>this</tt>, anything inside the module, therefore <tt>this.moduleContext</tt>, and the contents of <tt>moduleContext</tt>.
+/>
+
+I'm not going to assume you know about the <tt>with</tt> block.	I was going to provide a reference, but the Powers that Be have decided, "With Block Considered Harmful", and gracefully omitted it from all of their tutorials on Javascript syntax.	The <tt>with</tt> block takes a Javascript <tt>Object</tt> and makes its named items local variables in the nested block.  This is useful for classic operations like:
+">
+ with (Math) {
+  return [radius * cos(angle), radius * sin(angle)];
+ }
+/>
+
+Rather than the more repetitive and cumbersome:
+">
+ return [radius * Math.cos(angle), radius * Math.sin(angle)];
+/>
+
+This is worth mentioning because the <tt>with</tt> block makes a syntax analogous to Python's <tt>from module import *</tt> possible, though fraught with some avoidable hazards.  If you intend to declare variables inside of a <tt>with</tt> block, for < https://bugzilla.mozilla.org/show_bug.cgi?id=383558 "reasons you need not learn the hard way" >, you should put a closure inside of your innermost with block:
+">
+ with (require('environment.js')) {
+ with (require('base.js')) {
+ (function () {
+
+ var name = "foo"; /* safe */
+
+ }).call(this); /* closure */
+ }} /* with */
+/>
+If you do not do this, you will find bugs where you will be overwriting variables in that last required module.  The use of <tt>Function.call</tt> is necessary because, without it, your closure does not inherit your context object (<tt>this</tt>) and you will find yourself in the global name space.	Also, bear in mind that names provided by later <tt>with</tt> blocks mask earlier variables with the same name.  These are all of the perils of using <tt>with</tt> blocks and the work around for all of them.
+
+Here follows an example of a module, and use of that module:
+
+<tt>demo.html</tt>:
+">
+ &lt;html&gt;
+  &lt;head&gt;&lt;!-- of a man --&gt;
+   &lt;script src="modules.js"&gt;&lt;/script&gt;
+   &lt;script&gt;chiron.require('demo.js');&lt;/script&gt;
+  &lt;/head&gt;
+  &lt;body&gt;&lt;!-- of a cow --&gt;
+  &lt;/body&gt;
+ &lt;/html&gt;
+/>
+
+<tt>demo.js</tt>:
+">
+ with (require('base.js')) { /* from base import * */
+ (function () { /* closure */
+ var browser = require('browserBase.js'); /* import browser_base as browser */
+
+ /* when the DOM has loaded */
+ browser.ready.observe(function () {
+  document.body.innerHTML = dir(base).join(', ');
+  /*
+   dir is a function provided by base.js
+   that constructs a List of all the
+   names in the given module, or this module
+   by default.
+  */
+ });
+
+ }).call(this); /* closure */
+ } /* with */
+/>
+
+That concludes this introduction to Chiron modules.  Stay tuned for:
+*>
+    Using Centauren Iterations, Lists, and Dictionaries
+    Writing and Using Centauren Types
+    Writing Centauren Web Pages with Chironscript
+    Writing and Using Centauren Widgets
+    Writing and Running Centauren Unit Tests
+/>
+
+<i>with thanks to Mike Stone and Ryan Ernst for proofreading</i>
+
+!>vim:noexpandtab
+

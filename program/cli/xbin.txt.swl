@@ -1,0 +1,66 @@
+1>~/bin
+<!-- :vim:lbr:wrap:co=80 -->
+
+I've started a project on < http://github.com github > for my collection of general-purpose shell scripts: the ones I keep in < http://github.com/kriskowal/xbin/tree/master ~/bin > on each of my shell accounts.  If you have any general purpose utilities, don't hesitate to fork the project; I'm sure we could collectively build a fantastic set of power tools.
+
+->>
+
+I wrote a new one this week, called <tt>xip</tt>, that is a shell analog for the <tt>zip</tt> function in many languages (the name <tt>zip</tt> is naturally reserved for the <tt>pkzip</tt> utility).  I created this script to join the ranks of <tt>diff</tt> and <tt>comm</tt>, all functions that benefit from multiple input streams.  This comes on the heels of discovering at < http://commandlinefu.com commandlinefu.com > that there's a syntax for subshell fifo replacement.  That is, you can supply a subshell as an argument to a command, and it will be replaced with the file name of a named pipe.  Let's take the the canonical example:
+
+">
+ <b>$ cat a</b>
+ a
+ b
+ c
+ <b>$ cat b</b>
+ b
+ a
+ <b>$ diff &lt;(sort a) &lt;(sort b)</b>
+ 3d2
+ &lt; c
+/>
+
+To peer under the hood, I used <tt>echo</tt>.
+
+">
+ <b>$ echo &lt;(echo)</b>
+ /dev/fd/63
+/>
+
+Ahah!  The stream gets passed as an argument!
+
+So, this opens up a world of possibilities.  Normally you can only work with linear pipelines because the functions or programs only have one input and one output stream, and this limitation has created a dearth of standard utilities for working with multiple input streams.  Before discovering this feature, the command line was like a programming language where functions only accepted one argument (and no implicit partial application, smarty-pants).  Now I feel like I've discovered <tt>bash</tt>'s secret cow level.
+
+So, to remedy the lack of multi-parameter functions in shell, I started by making <tt>xip</tt>.  It takes any number of file names as arguments and interlaces the lines of their output until one of the streams closes.
+
+">
+ <b>$ xip &lt;(echo 1; echo 2) &lt;(echo a; echo b)</b>
+ 1
+ a
+ 2
+ b
+/>
+
+You can then pipe that to a while read loop, or <tt>xargs -n 2</tt> loop, to create a table.  This example enumerates the lines of a file (<tt>jot</tt> for BSD, <tt>seq</tt> for Linux).
+
+">
+ <b>$ xip &lt;(seq `cat a | wc -l`) a | xargs -n 2</b>
+ 1 a
+ 2 b
+ 3 c
+/>
+
+I suppose the next fun trick is producing multiple output streams, with something like <tt>tee</tt> and <tt>mkfifo</tt>.  I leave this as an exercise for the reader.
+
+->>
+
+I've also included some of my older scripts from back in the days when I was working exclusively on Linux and used <tt>mpg123</tt> to play my music.  <tt>mpg123</tt> is a command line music player, and it doesn't really have a playlist system built in (for that there are alternatives, but I digress).  So, I used a pipeline to generate my playlist stream.  <tt>cycle</tt>, <tt>shuffle</tt>, and <tt>enquote</tt> are in the github < http://github.com/kriskowal/xbin/tree/master ~/bin > project.
+
+">
+ <b>$ find . -name '*.mp3' \
+  | cycle \
+  | shuffle `find . -name '*.mp3' | wc -l` \
+  | enquote \
+  | xargs -n 1 mpg123</b>
+/>
+

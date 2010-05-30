@@ -1,0 +1,16 @@
+1>Swil
+
+On another note, I didn't finish Swil on time.  I'll be working on it over the summer.
+
+My attempt (blind stab) to build the syntax evaluation and apply, especially in the absence of a complete parser, revealed some conceptual problems, including a syntax collision, and ultimately didn't work in many cases.
+
+As for the syntax collision, anonymous functions in Swil will require an additional character.  My original concept for the syntax, <tt>(parameters): routine</tt>, doesn't pan out because it collides with assignment to various kinds of sequences, and even to parenthesized single element evaluations.  So, with an added dot, <tt>.(parameters): arguments</tt> will have to suffice.
+
+As for making the evaluation system work, I'm considering the implications of merging the <tt>context</tt> and <tt>syntax</tt> structures, and making sure that application (<tt>apply</tt>) never directly calls a named function.  Rather, <tt>apply</tt> will look up a <tt>context</tt> corresponding to the <tt>operator</tt>, then apply it against the <tt>operand</tt>.
+
+Another issue I ran into was that function calls cannot inherently be <tt>generators</tt>.  Normal function calls lend a user to believe that the function values evaluate expediently.  I may introduce an <tt>iterate</tt> built-in for iterative evaluation of a function call.  I may do something else, but my priority will be to make instantaneous evaluation work first.
+
+I also look forward to implementing <tt>types</tt>, <tt>casting</tt>, <tt>function overload</tt>, <tt>pattern matching</tt>, and <tt>grammar matching</tt> eventually.
+
+I hope to have minimal functionality ready for the function programming competition soon.
+

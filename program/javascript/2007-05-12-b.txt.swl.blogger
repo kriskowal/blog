@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-8852786344494974285</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;I conducted a quick experiment to assess whether it is worth worrying about the size and distribution of Javascript modules.  I gathered the following numbers on my Linux box at home (fast) connected to Cixar (fast) over my home Internet connection (average today).&lt;/p&gt;
+
+&lt;p&gt;&lt;table&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						ping cixar.com
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						30ms
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						ping google.com
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						80ms
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						HTTP overhead
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						30ms
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						bandwidth
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						0.1KB/ms
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						patience
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						1500ms
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						maximum size
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						150KB
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						Chiron core
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						100KB
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						Chiron core shrunk
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						50KB
+		&lt;/td&gt;
+	&lt;/tr&gt;
+	&lt;tr&gt;
+		&lt;td&gt;
+						Chiron core shrunk compressed
+		&lt;/td&gt;
+		&lt;td colspan=2&gt;
+						13KB
+		&lt;/td&gt;
+	&lt;/tr&gt;
+&lt;/table&gt;&lt;/p&gt;
+&lt;p&gt;I've decided not to worry about the size or distribution of Chiron until its core is five times bigger.&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:55.534-07:00</ns0:updated><ns0:published>2007-05-12T00:00:00.002-07:00</ns0:published><ns0:title type="text">Javascript and Load Time</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/8852786344494974285/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=8852786344494974285" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8852786344494974285" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8852786344494974285" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2007/05/javascript-and-load-time_12.html" rel="alternate" title="Javascript and Load Time" type="text/html" /></ns0:entry>

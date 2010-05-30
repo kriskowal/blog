@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-4237591044548386609</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;The name "Cixar Javascript Library", or CJL, has numerous virtues.  It has a three letter acronym, a full name long enough to asphyxiate a cheetah, conjures absolutely no mental image, nor alludes to any works of art or literature.&lt;/p&gt;
+&lt;p&gt;I'd like to announce that, having rigorously contemplated the issue from a vantage about two feet above my naval (that is, half of a meter for our dear friends huddled safely distant from the sanity interference field), I've decided to name the Cixar Javascript Library.  My requirements are succinct:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;one word,&lt;/li&gt;
+	&lt;li&gt;allegorical, preferably ambiguous,&lt;/li&gt;
+	&lt;li&gt;eminently brandable,&lt;/li&gt;
+	&lt;li&gt;subtly humorous,&lt;/li&gt;
+	&lt;li&gt;an alternate spelling in Unicode,&lt;/li&gt;
+	&lt;li&gt;If possible, the name must enamour an attractive girl no more than five years older or younger than me before Monday.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I browsed Wikipedia and discovered Ajax's centaur tutor, &lt;i&gt;Chiron&lt;/i&gt;.  So, there you have it, the library's name is Chiron.  I leave it as an exercise for the reader and my fate/doom to discover whether it will suffice.  However, I will explicitly state that brandability is fulfilled.  Chiron, it turns out (back me up on this, Wikipedia), was really half-cow, the only Centauren to grace the Hellenic Pantheon.&lt;/p&gt;
+
+
+&lt;hr&gt;
+&lt;p&gt;For prospective users of Chiron, I have a question of nomenclature preference.  Use of the Chiron library requires the HTML author to include exactly one &lt;tt&gt;script&lt;/tt&gt; tag in their header, &lt;a href="http://cixar.com/tracs/javascript/browser/modules.js"&gt;modules.js&lt;/a&gt; (13KB shrunk but not compressed).  From there the author can opt to use whatever modules they will.&lt;/p&gt;
+&lt;p&gt;Central to the Chiron library is a module currently called &lt;a href="http://cixar.com/tracs/javascript/browser/javascript.js"&gt;javascript.js&lt;/a&gt; that contains exceptions (&lt;tt&gt;KeyError&lt;/tt&gt;), the type system (&lt;tt&gt;type&lt;/tt&gt;), common types (&lt;tt&gt;Dict&lt;/tt&gt;, &lt;tt&gt;List&lt;/tt&gt;, &lt;tt&gt;Iter&lt;/tt&gt;), and a wealth of common functions (&lt;tt&gt;forEach&lt;/tt&gt;, &lt;tt&gt;stripEnd&lt;/tt&gt;) (currently 36KB shrunk but not compressed).  Since I would like to give the user the option of not loading this module, most modules explicitly include it, even though in a language like Python, these primitives would be  implicitly available.&lt;/p&gt;
+&lt;p&gt;I called the module &lt;tt&gt;javascript.js&lt;/tt&gt; since it would include primitives that in Python would be part of the language.  In Python, this module would probably be called &lt;tt&gt;__builtins__.py&lt;/tt&gt;.  In any other Javascript library, precedent suggests that that module would be called &lt;tt&gt;base.js&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;Which of the following should I call this module of language primitives?&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;&lt;tt&gt;javascript.js&lt;/tt&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;builtins.js&lt;/tt&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;tt&gt;base.js&lt;/tt&gt;,&lt;/li&gt;
+	&lt;li&gt;&lt;i&gt;your idea here&lt;/i&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Please send me an email and weigh in.&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:57.101-07:00</ns0:updated><ns0:published>2007-05-12T00:00:00.003-07:00</ns0:published><ns0:title type="text">Cixar Javascript Library and Names</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/4237591044548386609/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=4237591044548386609" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/4237591044548386609" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/4237591044548386609" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2007/05/cixar-javascript-library-and-names_12.html" rel="alternate" title="Cixar Javascript Library and Names" type="text/html" /></ns0:entry>

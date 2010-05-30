@@ -1,0 +1,228 @@
+
+1> Designing Django's Object-Relational-Model - The Python Saga - Part 6
+
+Django is a web application framework in the Python language.  One of the advantages that Django has over other libraries is that it was written and designed by Python experts.  That is to say, they knew about variadic arguments, properties, and metaclasses.  Furthermore, they knew how to cleverly use these ideas to sweep a lot of complexity under the hood (or bonnet if you will; some of them appear to be British) so that common developers, or uncommonly good developers who want to think about other things most of the time, can gracefully suspend disbelief that anything complicated is going on when they design their database in pure Python.  This article will illustrate how Django uses metaclasses and properties to present an abstraction layer where you can specify a database schema with Python classes.  For simplicity, the "database" backend will be plain Python primitive objects&mdash;tables will be dictionaries of dictionaries.
+
+In the end, we want to be able to write code that looks a whole lot like it's using Django's Object-Relational-Model:
+
+">
+ class Cow(Model):
+  id = PrimaryKey()
+  name = ModelProperty()
+
+ cow = Cow(id = 0, name = 'Moolius')
+ cow.save()
+
+ cow = Cow.objects.get(0)
+/>
+
+The easiest part (for the purpose of this exercise) is Django's concept of an "object manager".  In Django, every model has an object manager that provides a query API and, depending on the backend, might cache instances of Model objects.  Conveniently, a very narrow subset of the object manager API is almost exactly the same as a dictionary.  Conceptually, the object manager boils down to a dictionary proxy for the database where you can use the <tt>get</tt> function to retrieve records from the database.  For simplicity, our <tt>ObjectManager</tt> is just going to be a dictionary.
+
+">
+ class ObjectManager(dict):
+  pass
+/>
+
+Beyond the scope of this article, the <tt>ObjectManager</tt> should be handy for grabbing lots of objects from the database at once.  Django provides a very thorough and relatively well-optimized lazy query system with its object managers.  The <tt>ObjectManager</tt> has <tt>get</tt>, and <tt>filter</tt> methods which, instead of simply accepting the primary key, accept keyword arguments that translate to predicate logic rules.  In particular, the <tt>filter</tt> function is lazy, so you can chain filter commands to construct complex queries and Django only goes to the database once.
+
+While it would be super-cool to model all of this with native Python, it actually is a lot of code, so that's a topic for maybe later.  We'll just use the built in <tt>dict.get</tt>.
+
+We'll also need all of the code from < ordered-properties.html "Part 5" > since models will be another application of the ordered property pattern.  This is how Django creates SQL tables with fields in the same order as the Python properties.
+
+">
+ from ordered_class import \
+  OrderedMetaclass,\
+  OrderedClass,\
+  OrderedProperty
+/>
+
+We use the <tt>OrderedMetaclass</tt> to make a <tt>ModelMetaclass</tt>.  The model metaclass will have all the same responsibilities as our <tt>StructMetaclass</tt>, including "dubbing" the properties so that they know their own names.  The model metaclass will also create an <tt>ObjectManager</tt> for the class.  This isn't the complete <tt>ModelMetaclass</tt>; we'll come back to it.
+
+">
+ class ModelMetaclass(OrderedMetaclass):
+  def __init__(self, name, bases, attys):
+   super(ModelMetaclass, self).__init__(name, bases, attys)
+   if '_abstract' not in attys:
+    self.objects = ObjectManager()
+    for name, property in self._ordered_properties:
+     property.dub(name, self)
+/>
+
+The next step is to create a <tt>ModelProperty</tt> base class.  This class will be an <tt>OrderedProperty</tt> so it's sortable.  It will also need to implement the <tt>dub</tt> method so it can figure out its name.  Other than that, it'll be just like the <tt>StructProperty</tt> from the previous section: it will get and set its corresponding item in the given object.
+
+">
+ class ModelProperty(OrderedProperty):
+  def __get__(self, objekt, klass):
+   return objekt[self.item_name]
+  def __set__(self, objekt, value):
+   objekt[self.item_name] = value
+  def dub(self, name):
+   self.item_name = name
+   return self
+/>
+
+There is a distinction in the refinement of <tt>ModelProperty</tt> from <tt>StructProperty</tt>: <tt>ModelProperty</tt> objects will eventually need to distinguish the value stored in the dictionary from the value returned when you access an attribute.  In the primitive case, they're the same, but for <tt>ForeignKey</tt> objects, down the road, you'll store the primary key for the foreign model instead of the actual object.  This is the same as the behavior in an underlying database backend.
+
+">
+ class ModelProperty(OrderedProperty):
+  def __get__(self, objekt, klass):
+   return objekt[self.item_name]
+  def __set__(self, objekt, value):
+   objekt[self.item_name] = value
+  def dub(self, name):
+   self.attr_name = name
+   self.item_name = name
+   return self
+/>
+
+Let's consider a <tt>PrimaryKey</tt> <tt>ModelProperty</tt>.  The purpose of a <tt>PrimaryKey</tt> is to designate a property of a model that will be used as the index in its object manager dictionary.  In Django, this can be an implicit <tt>id</tt> field at the beginning of the table.  For simplicity in this exercise, we'll require every model to explicitly declare a <tt>PrimaryKey</tt>.  The <tt>ModelMetaclass</tt> will identify which of its ordered properties is <i>the</i> primary key by observing its type.  Other than their type, a primary key's behavior is the same as a normal <tt>ModelProperty</tt>, so it's a really easy declaration:
+
+">
+ class PrimaryKey(ModelProperty):
+  pass
+/>
+
+Now we can go back to our <tt>ModelMetaclass</tt> and add the code we need for every class to know the name of its primary key.  I create a list of <tt>PrimaryKey</tt> objects from my <tt>_ordered_properties</tt> and pop off the last one, leaving error checking as an exercise for a more rigorous implementation.  There should be only one primary key.
+
+">
+ class ModelMetaclass(OrderedMetaclass):
+  def __init__(self, name, bases, attys):
+   super(ModelMetaclass, self).__init__(name, bases, attys)
+   if '_abstract' not in attys:
+    self.objects = ObjectManager()
+    for name, property in self._ordered_properties:
+     property.dub(name)
+    self._pk_name = [
+     name
+     for name, property in self._ordered_properties
+     if isinstance(property, PrimaryKey)
+    ].pop()
+/>
+
+Now all we need is a <tt>Model</tt> base class.  The model base class will just be a dictionary with the model metaclass and a note that it's abstract: that is, it does not have properties so the metaclass better not treat it as a normal model.
+
+">
+ class Model(OrderedClass, dict):
+  __metaclass__ = ModelMetaclass
+  _abstract = True
+/>
+
+The model will also have a special <tt>pk</tt> attribute for accessing the primary key and a <tt>save</tt> method for committing a model to the <tt>ObjectManager</tt>.
+
+">
+ class Model(OrderedClass, dict):
+  __metaclass__ = ModelMetaclass
+  _abstract = True
+
+  def save(self):
+   self.objects[self.pk] = self
+
+  @property
+  def pk(self):
+   return getattr(self, self._pk_name)
+/>
+
+Now we have all the pieces we need to begin using the API.  Let's look at that cow model.
+
+">
+ class Cow(Model):
+  id = PrimaryKey()
+  name = ModelProperty()
+
+ cow = Cow(id = 0, name = 'Moolius')
+ cow.save()
+
+ cow = Cow.objects.get(0)
+/>
+
+All of this works now.  You make a cow model; that invokes the model metaclass that sets up <tt>Cow._pk_name</tt> to be <tt>"id"</tt> and tacks on a <tt>Cow.objects</tt> object manager.  Then we make a cow and put it in <tt>Cow.objects</tt> with the save method.  This is analogous to committing it to the database backend.  From that point, we can use the object manager to retrieve it again.
+
+We can refine the <tt>Model</tt> base class to take advantage of the fact that it's not just a dictionary anymore: it's an <i>ordered</i> dictionary.  We create a better <tt>__init__</tt> method that will let us assign the attributes of our <tt>Cow</tt> either positionally or with keywords.  That makes our cow more like a hybrid of a list and a dictionary.  Also, since our model instances aren't merely dictionaries, we create a new <tt>__repr__</tt> method that will note that cows are cows and moose are moooose.  The new <tt>__repr__</tt> method also takes the liberty to write the items in the order in which their properties were declared.
+
+">
+ class Model(OrderedClass, dict):
+
+  &hellip;
+
+  def __init__(self, *values, **kws):
+   super(Model, self).__init__()
+   found = set()
+   for (name, property), value in zip(
+    self._ordered_properties,
+    values,
+   ):
+    setattr(self, name, value)
+    found.add(name)
+   for name, value in kws.items():
+    if name in found:
+     raise TypeError("Multiple values for argument %s." % repr(name))
+    setattr(self, name, value)
+
+  &hellip;
+
+  def __repr__(self):
+   return '<%s %s>' % (
+    self.__class__.__name__,
+    " ".join(
+     "%s:%s" % (
+      property.item_name,
+      repr(self[property.item_name])
+     )
+     for name, property in self._ordered_properties
+    )
+   )
+/>
+
+Now we can make a cow model with positional and keyword arguments, and print it out nice and fancy-like:
+">
+ &gt;&gt;&gt; Cow(0, name = 'Moolius')
+ &lt;Cow id:0 name:"Moolius"&gt;
+/>
+
+The next step is to introduce <tt>ForeignKey</tt> model properties.  These are properties that will refer, via a relation on a primary key, to an object in another model.  So, the <tt>ForeignKey</tt> class will accept a <tt>Model</tt> for the foreign model.  Its dub method will override the <tt>item_name</tt> (preserving the <tt>attr_name</tt>) provided by it's super-class's <tt>dub</tt> method.  The new <tt>item_name</tt> with be the <tt>attr_name</tt> and the name of the primary key from the foreign table, delimited by an underbar.  This will let the foreign key property hide the fact that it does not contain a direct reference to the foreign object; it just keeps the foreign object's primary key.  However, if you access the foreign key property on a model instance, it will go off and diligently fetch the corresponding model instance.  If you assign to the foreign key property, it'll tolerate either a primary key or an actual instance.
+
+">
+ class ForeignKey(ModelProperty):
+  def __init__(self, model, *args, **kws):
+   super(ForeignKey, self).__init__(*args, **kws)
+   self.foreign_model = model
+  def __get__(self, objekt, klass):
+   return self.foreign_model.objects.get(objekt[self.item_name])
+  def __set__(self, objekt, value):
+   if isinstance(value, self.foreign_model):
+    objekt[self.item_name] = value.pk
+   else:
+    objekt[self.item_name] = value
+  def dub(self, name):
+   super(ForeignKey, self).dub(name)
+   self.item_name = '%s_%s' % (
+    name,
+    self.foreign_model._pk_name,
+   )
+/>
+
+Now we can write code with more than one model using relationships.  Let's give our cow a bell.
+
+">
+ class Bell(Model):
+  id = PrimaryKey()
+
+ class Cow(Model):
+  id = PrimaryKey()
+  name = ModelProperty()
+  bell = ForeignKey(Bell)
+
+ bell = Bell(0)
+ bell.save()
+ cow = Cow(0, 'Moolius', bell)
+ cow.save()
+/>
+
+Note that you must <tt>save</tt> the bell so that when you construct the cow, it can fetch the bell from <tt>Bell.objects</tt>.
+
+There's more to Django's ORM, of course.  This article doesn't cover parsing and validation, which are both assisted by the ORM.  Nor does it cover queries, query sets, the <tt>related_name</tt> for <tt>ForeignKey</tt> properties on foreign models, Django's ability to use strings for forward references to models that have not yet been declared, or many of the other really neat features.
+
+What this article does cover though, is that you can create a powerful abstraction of a proxied database with pure-Python in less than 200 lines of code.  This means that you could create a light-weight proxy over HTTP to a Django database that exposes itself with a REST API.  You could also create an abstraction layer that would allow you to pump Django ORM duck-types back into Django to use pure Python objects in addition to or in stead of a database backend.
+
+But, if this article does nothing else, I hope it communicates that Django is cool.  I have read a whole lot of code from every dark corner of the web and I have liked very little of it; people I've worked with will testify that I've regularly "hated on" every library or framework I've ever seen.  I've never met < http://simonwillison.net/ "Simon Willson" > and the growing developer community around Django.  However, I've read their code and now I can tell you, over the course of several articles, that they're really smart and you should use their < http://www.djangoproject.com/ code >.
+

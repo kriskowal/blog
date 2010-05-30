@@ -1,0 +1,172 @@
+
+1> Ordered Properties - The Python Saga - Part 5
+
+In C and SQL, structs and records have properties that appear in a particular order.  In Python, objects use hash-tables to store their attributes, so the order is not deterministic nor relevant.  That's no consolation if you're trying to model C structs or SQL tables in Python though.  Reading though the Django code, I discovered that those wily coders had synthesized a technique that combines the virtues of properties and metaclasses that we can generally model the order in which fields of a struct or SQL table appear.
+
+The trick is to provide an API that allows your users to write code like:
+">
+ from time import gmtime
+ from cstruct import Struct, IntegerProperty
+
+ class EpochTime(Struct):
+  seconds = IntegerProperty()
+  microseconds = IntegerProperty()
+
+ epoch_time = EpochTime()
+ epoch_time.unpack('\x48\xdf\x32\x8f\x00\x00\x0c\x05', '>')
+ timestruct = gmtime(epoch_time.seconds)
+/>
+
+In this case, the <tt>Struct</tt> type cares about the size, order, and disposition of the C structure it models so that it can unpack a byte buffer presumably retrieved from a C-type library.
+
+There are two components to the general solution.  First, there's an <tt>OrderedProperty</tt> base type.  Ordered properties track the order in which they were initialized.  For this purpose, ordered properties use a global counter.  The absolute value of a property's creation counter is irrelevant.  The only requirement is that they monotonically increase as each property is declared, and that classes declared concurrently do not interfere.
+
+">
+ from itertools import count
+ next_counter = count().next
+/>
+
+I learned about <tt>itertools</tt> from < http://sayspy.blogspot.com/ "Brett Cannon" > who was preparing his thesis defense when I was at < http://http://www.calpoly.edu/ "Cal Poly" >.  In another piece of code, which I would cite if I could recall, I learned the trick of using the <tt>itertools.count</tt> function to atomize a global counter.  It takes advantage of Python's dubious global interpreter lock.
+
+Then the <tt>OrderedProperty</tt> base type just stores a creation counter upon initialization.  Keep in mind that all derived types must trickle their <tt>__init__</tt> call&mdash;your base types are not always what they seem and there are use cases you can not foresee where you might be required to receive and pass your initialization arguments to an unknown super-type.  That's a side-effect of working in a language with mix-ins, and it's a "good thing".
+
+">
+ class OrderedProperty(object):
+  def __init__(self, *args, **kws):
+   self._creation_counter = next_counter()
+   super(OrderedProperty, self).__init__(*args, **kws)
+/>
+
+The next part of the puzzle is inspecting your property order.  We use a metaclass to note when new types are created and we give them an <tt>_ordered_properties</tt> attribute with the ordered-property items in their attributes.  Keep in mind that base types might have properties too.  <tt>__mro__</tt> is an attribute of all classes that is a linearized list of a classes inheritance hierarchy.  It's effectively the result of a dynamic topological sort algorithm for the closure of your base types.  We traverse it backwards so that if you create a dictionary via <tt>dict(_ordered_properties)</tt>, name collisions are resolved chronologically.
+
+">
+ class OrderedMetaclass(type):
+  def __init__(self, name, bases, attys):
+   super(OrderedMetaclass, self).__init__(name, bases, attys)
+   self._ordered_properties = sorted(
+    (
+     (name, value)
+     for base in reversed(self.__mro__)
+     for name, value in base.__dict__.items()
+     if isinstance(value, OrderedProperty)
+    ),
+    key = lambda (name, property): property._creation_counter,
+   )
+/>
+
+Then, we create our <tt>OrderedClass</tt> that we can inherit to get free <tt>_ordered_properties</tt> attributes.
+
+">
+ class OrderedClass(object):
+  __metaclass__ = OrderedMetaclass
+/>
+
+Let's see it in action:
+
+">
+ class Foo(OrderedClass):
+  bar = OrderedProperty()
+  baz = OrderedProperty()
+ Foo._ordered_properties == [
+  ('bar', &lt;Ordered Property instance somewhere&gt;),
+  ('baz', &lt;Ordered Property instance somewhere&gt;),
+ ]
+/>
+
+With a small modification, we can track ordered inner classes too.
+
+">
+ class OrderedMetaclass(type):
+  def __init__(self, name, bases, attys):
+   super(OrderedMetaclass, self).__init__(name, bases, attys)
+   self._creation_counter = next_counter()
+   self._ordered_properties = sorted(
+    (
+     (name, value)
+     for base in reversed(self.__mro__)
+     for name, value in base.__dict__.items()
+     if isinstance(value, OrderedProperty)
+     or isinstance(value, OrderedMetaclass)
+    ),
+    key = lambda (name, property): property._creation_counter,
+   )
+/>
+
+So, we put all of those order classes in our generic ordered properties module.  Now we can delve into our particular <tt>Struct</tt> example.  
+
+First, we need field types.  We will need a base type and derivative types for all of the field types we want to model from C, like <tt>IntegerField</tt>.  Bear in mind that <tt>OrderedProperty</tt> is just a mix-in; it doesn't actually define <tt>__get__</tt> and its ilk because those are all specific to the derivative implementation.  All struct fields are going to store their actual values in a special <tt>_value</tt> dictionary on their corresponding <tt>Struct</tt> instance.
+
+">
+ class StructProperty(OrderedProperty):
+  def __get__(self, objekt, klass):
+   return objekt._values[self.name]
+  def __set__(self, objekt, value):
+   objekt._values[self.name] = value
+  def dub(self, name):
+   self.name = name
+   return self
+/>
+
+You'll notice that instances of <tt>StructProperty</tt> need to know their <tt>name</tt>, the key in their corresponding instance's <tt>_values</tt> dictionary.  The struct property instances don't get this from their initializer.  Instead, each property will get "dubbed", given a name, when the <tt>StructMetaclass</tt> visits its <tt>_ordered_properties</tt>.
+
+Let's just look at an integer.
+
+">
+ class IntegerProperty(StructProperty):
+  _format = 'i'
+/>
+
+The only thing special about an integer is that it's format specifier for the <tt>pack</tt> routine is "i".
+
+We're going to want to use a metaclass again, this time inheriting from our <tt>OrderedMetaclass</tt>.  The purpose of this metaclass will be to analyze the ordered properties, construct an aggregate format specifier for <tt>pack</tt> and <tt>unpack</tt> methods, and to <tt>dub</tt> each of its properties with their name.
+
+">
+ class StructMetaclass(OrderedMetaclass):
+  def __init__(self, name, bases, attys):
+   super(StructMetaclass, self).__init__(name, bases, attys)
+   for name, property in self._ordered_properties:
+    property.dub(name)
+   self._format = "".join(
+    property._format
+    for name, property in self._ordered_properties
+   )
+/>
+
+All that remains is to create our API base class, <tt>Struct</tt>.  This class initializes its values and declares its metaclass.
+
+">
+ from struct import unpack
+
+ class Struct(OrderedClass):
+  __metaclass__ = StructMetaclass
+
+  def __init__(self, *args, **kws):
+   super(Struct, self).__init__(*args, **kws)
+   self._values = {}
+
+  def unpack(self, value, prefix = None):
+   if prefix is None: prefix = ""
+   for (name, property), value in zip(
+    self._ordered_properties,
+    unpack(prefix + self._format, value)
+   ):
+    self._values[name] = value
+/>
+
+So, now our epoch time example is possible using <tt>Struct</tt> and <tt>IntegerProperty</tt>, completely oblivious to the machinations behind the scenes.
+
+">
+ from time import gmtime
+ from datetime import datetime
+
+ class EpochTime(Struct):
+  seconds = IntegerProperty()
+  microseconds = IntegerProperty()
+ epoch_time = EpochTime()
+
+ epoch_time.unpack('\x48\xdf\x32\x8f\x00\x00\x0c\x05', '>')
+ timestruct = gmtime(epoch_time.seconds)
+ datestruct = (timestruct[:6] + (epoch_time.microseconds,))
+ print datetime(*datestruct)
+/>
+

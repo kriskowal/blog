@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-340422089798592937</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;I think I did something clever.  Once again, it's time to fight the losing battle of explanation.  I find that I've been repeating myself a lot in Javascript.  Worse, I've had to compromise my ideals pretty frequently.  Consider the following Javascript.&lt;/p&gt;
+
+&lt;pre&gt;
+&amp;lt;html&amp;gt;
+	&amp;lt;head&amp;gt;
+		&amp;lt;script src="http://cixar.com/javascript/modules.js"&amp;gt;
+	&amp;lt;/head&amp;gt;
+	&amp;lt;body&amp;gt;
+		&amp;lt;div id="clock_0"&amp;gt;&amp;lt;/div&amp;gt;
+		&amp;lt;script&amp;gt;
+			require('clock.js', function (clock) {
+				clock.Clock(
+					document.getElementById('clock.js')
+				);
+			});
+		&amp;lt;/script&amp;gt;
+	&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/pre&gt;
+&lt;p&gt;In this example, I've installed the Cixar Javascript module loader.  This gives me a global function called &lt;tt&gt;require&lt;/tt&gt; that fetches javascripts and loads them as singleton modules and returns the module object or calls a given function closure with the module object.  I then populate my document with HTML and bless the HTML with Javascripts.  In this case, I set up a clock.  The details of how this clock works are hidden in a &lt;tt&gt;Clock&lt;/tt&gt; type that is in turn hidden within a &lt;tt&gt;clock&lt;/tt&gt; module.  This particular setup requires that any blessed DOM element have an identifier so that it can be in turn fetched by name in the Javascript.&lt;/p&gt;
+&lt;p&gt;It turns out that this pattern of laying out out a DOM element like a &lt;tt&gt;div&lt;/tt&gt; followed by a &lt;tt&gt;script&lt;/tt&gt; to imbue it with DHTML powers is pretty common in my Ish project.  This makes for a lot of &lt;tt&gt;script&lt;/tt&gt; blocks but also makes the server side code rather orthogonal and elegant.  It's not that bad, and I am proud it's this clean so far.&lt;/p&gt;
+&lt;p&gt;However, it could be much cleaner.  Consider this example that I implemented today.&lt;/p&gt;
+
+&lt;pre&gt;
+&amp;lt;html&amp;gt;
+	&amp;lt;head&amp;gt;
+		&amp;lt;script src="http://cixar.com/javascript/modules.js"&amp;gt;&amp;lt;/script&amp;gt;
+		&amp;lt;script&amp;gt;require('init.js')&amp;lt;/script&amp;gt;
+	&amp;lt;/head&amp;gt;
+	&amp;lt;body&amp;gt;
+		&amp;lt;div require="clock.js#Clock"&amp;gt;&amp;lt;/div&amp;gt;
+	&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;&lt;/pre&gt;
+&lt;p&gt;Observe that with this approach, the &lt;tt&gt;div&lt;/tt&gt; element does not have an identifier nor a corresponding &lt;tt&gt;script&lt;/tt&gt; block.  Instead, I've loaded an &lt;tt&gt;init.js&lt;/tt&gt; module (the name will change when you email me a better one).  The &lt;tt&gt;init.js&lt;/tt&gt; module sets up a page load listener.  When the page loads, the initializer scans the entire DOM for elements with &lt;tt&gt;require&lt;/tt&gt; or &lt;tt&gt;requireRelative&lt;/tt&gt; attributes.  It then loads the given module, extracts the given function from the module, and blesses the corresponding element with that function.&lt;/p&gt;
+&lt;p&gt;I suspect this has a hidden advantage in addition to elegance.  With the previous strategy, every DOM element had a corresponding &lt;tt&gt;getElementById&lt;/tt&gt; call.  I suspect that &lt;tt&gt;getElementById&lt;/tt&gt; traverses the DOM until it finds an element with the given ID (plausibly, the browser tracks an (id, element) mapping dynamically, but this would be tricky to implement correctly).  The old approach requires one of these traversals for every blessed DOM element.  This new approach only requires one traversal of the document per page load.&lt;/p&gt;
+&lt;p&gt;So, two questions for the audience.  What should this module be called instead of &lt;tt&gt;init.js&lt;/tt&gt;?  Alternately, should this behavior be automatically installed by &lt;tt&gt;modules.js&lt;/tt&gt;?&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:50.026-07:00</ns0:updated><ns0:published>2007-03-25T00:00:00.001-07:00</ns0:published><ns0:title type="text">Don't Repeat Yourself: or Javascript DOM Initializers</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/340422089798592937/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=340422089798592937" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/340422089798592937" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/340422089798592937" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2007/03/don-repeat-yourself-or-javascript-dom_25.html" rel="alternate" title="Don&amp;#39;t Repeat Yourself: or Javascript DOM Initializers" type="text/html" /></ns0:entry>

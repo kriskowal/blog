@@ -1,0 +1,116 @@
+1> Higher Order Functions in Javascript
+
+Recently I discovered that a friend of mine isn't using "Higher Order Functions" in <a href="http://en.wikipedia.org/wiki/Gender-neutral_pronoun">their</a> Javascript.  I cried.  However, I fear, this is common-place, perhaps some artifact of a latent and ubiquitous fear of closures instilled by Internet Explorer and the folklore that arises in the absence of reliable, or believable, information.  In any case, I'm resolved to expound the virtues of this lesser known programming paradigm among object oriented language aficionados.
+
+<a href="http://en.wikipedia.org/wiki/Higher-order_function">Higher Order Functions</a> are functions that accept or return functions.  This variety of insanity is possible in functional languages, or languages that provide <a href="http://en.wikipedia.org/wiki/Closure_(computer_science)">closures</a>.  It is of course possible to accept and return function pointers in C or its ilk, but these are not sufficient for Higher Order Functions because you cannot create functions that can refer to the local variables of the function that instantiated them.  This is the crux.
+
+It is helpful to think of a name space as an <tt>Object</tt>.  Calling a function creates a local name space, rooted in the name space in which the function is declared.  Unlike in assembly languages, these name spaces can persist, as <tt>Object</tt>s do, long past the lifetime of the function call that created them.  Like <tt>Object</tt>s, a name space exists as long as a reference exists referring to it.  However, among name spaces, the only way to refer to a name space is to create a name space rooted therein.  This means that the local variables of a function call exist as long as another function's name space refers to it.
+
+Permit me to offer a practical example, one that any one can use every day of the week.  Sort functions in most languages accept an optional comparator function as an argument.  C++'s <a href="http://www.boost.org/">Boost</a> library for example <a href="http://www.boost.org/libs/mpl/doc/refmanual/sort.html">accepts predicates</a>.  This is, of course, an insane hack since C++ isn't designed for functional fu.  Python provides <tt>sorted</tt> and accepts a comparator.  You don't have to believe me; the important point is that Javascript <a href="http://developer.mozilla.org/en/docs/Core_JavaScript_1.5_Reference:Global_Objects:Array:sort">follows suit</a>.
+
+This is the default <tt>sort</tt> behavior.
+">
+ var items = [3, 1, 2];
+ items.sort();
+ assert(items == [1, 2, 3]);
+/>
+
+A comparator is a function that accepts two arguments and returns an integer indicating whether the arguments are equivalent, sorted in ascending order or in descending order.  The result of a comparison call can be compared to 0 (on the right hand side of an expression) with <tt>==</tt>, <tt>&gt;</tt> and <tt>&lt;</tt> and the result will be exactly the same as if the operands were replaced with the comparison arguments respectively.  So, if <tt>compare(a, b) == 0</tt>, then <tt>a == b</tt>, if <tt>compare(a, b) &lt; 0</tt> then <tt>a &lt; b</tt>.  The simplest <tt>compare</tt> function provides these results for numbers.
+
+">
+ var compare = function (a, b) {
+  return b - a;
+ }
+/>
+
+This example, provides a reverse comparator; a comparator that will sort numbers in descending order.
+">
+ var compare = function (a, b) {
+  return -(b - a);
+ };
+ var items = [3, 1, 2];
+ items.sort(compare);
+ assert(items == [3, 2, 1]);
+/>
+
+Of course, there are all manner of objects that you might want to sort, and not all of them are strings and numbers.  Supposing you had an array of people, you might want to sort them by their last name.  You can do this with a comparator.
+
+">
+ var compare = function (a, b) {
+  if (a.lastName < b.lastName) {
+   return -1;
+  } else if (a.lastName == b.lastName) {
+   return 0;
+  } else {
+   return 1;
+  }
+ };
+ people.sort(compare);
+/>
+
+Of course, it would be cumbersome to give highly descriptive names to every block of code you wrote and used once, so it's no more reasonable to have to name all of your comparators.  You can just use an anonymous function.
+
+">
+ people.sort(function (a, b) {
+  if (a.lastName < b.lastName) {
+   return -1;
+  } else if (a.lastName == b.lastName) {
+   return 0;
+  } else {
+   return 1;
+  }
+ });
+/>
+
+However, you will find that all of your comparators will have the same shape.  They will probably all test equality and lessity.  It would be beneficial if you had a function that would create comparators for you just based on the attribute of the object you want to compare.  Enter higher order functions.  Let's construct one such function.
+
+We want to create a function that accepts two elements and returns a number reflecting their transitive relationship, a comparator, based on some attribute.  So, its clear that our function will <i>accept</i> an attribute name, and return a function.
+
+">
+ /* the higher order function: */
+ var by = function (attribute) {
+  /* the comparator: */
+  return function (a, b) {
+  };
+ };
+/>
+
+Lets see the function in full.
+
+">
+ /* the higher order function: */
+ var by = function (attribute) {
+  /* the comparator: */
+  return function (a, b) {
+   if (a[attribute] < b[attribute]) {
+    return -1;
+   } else if (a[attribute] == b[attribute]) {
+    return 0;
+   } else {
+    return 1;
+   }
+  };
+ };
+/>
+
+The important leap here is that the comparator can refer to the <tt>attribute</tt> from its enclosing name space, even though that function will have completed and been popped off the "stack" long before we ever call our comparator.
+
+We can use our mighty <tt>by</tt> function to sort people by last name much more readably and succinctly.
+
+">
+ people.sort(by('lastName'));
+/>
+
+For good or ill, this will work for rigid arrays of arrays (tables) as well, if you provide an integer instead of an attribute name.  I say this with half of a heart because it's a Pyrrhic victory.  The price of being able to perform member selection and array indexing with the same, generic syntax is the inability to distinguish member selection for associative array (or hash) indexing, but that is a tale of woe for another day.
+
+">
+ var table = [
+  ['Kris', 'Kowal', 3],
+  ['Ryan', 'Paul', 2],
+  ['Ryan', 'Witt', 1]
+ ];
+ table.sort(by(1));
+/>
+
+In any case, this demonstrates the power of higher order functions in your every day life.  If you don't like the <tt>for (var i = 0; i < length; i++)</tt> pattern (as you ought be weary of by now), modern Javascript implementations provide a higher order function, <tt>Array.forEach</tt>.  From the pantheon of functions you will also find <tt>map</tt>, <tt>fold</tt> or <tt>reduce</tt>, <tt>filter</tt>, <tt>compose</tt>, <tt>partial</tt>, and others.  Happy coding.
+

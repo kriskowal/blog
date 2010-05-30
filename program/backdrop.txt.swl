@@ -1,0 +1,11 @@
+1>Parametric Art
+
+I've been meaning to make some "parametric art" for some time now, and having worked on Tale graphics automation, I now have the tools I need.  Parametric art is the name I'm using for creation of artistic compositions where the position, orientation, and shading are programmed using what we learned in High School trigonometry by the pseudonym "parametric equations".  Last night I decided to attack the problem by making another set of backdrop images for Jason Reinsvold's < http://lostvectors.com/prelude "Bowmaster" >.  I popped open < http://inkscape.org/ Inkscape >, created some layers for sky, sun, moon, and terrain.  Instead of hand positioning the Sun and Moon, I just put them on the origin.  Then I pulled up my Python SVG tools that I made for generating maps.  Using some trig, I programmed the positions and rotations of the sun and moon.  Here are some samples:
+
+< http://cixar.com/~kris.kowal/bdoc/program/backdrop/3.png >
+< http://cixar.com/~kris.kowal/bdoc/program/backdrop/5.png >
+< http://cixar.com/~kris.kowal/bdoc/program/backdrop/10.png >
+< http://cixar.com/~kris.kowal/bdoc/program/backdrop/ more >
+
+Tomorrow's project is adjusting the linear gradients that overlay the cells in the foreground terrain to catch the light of the sun, moon, sky, or form shadows and silhouettes.
+

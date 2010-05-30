@@ -1,0 +1,6 @@
+1>Holiday Bash
+
+I'll be holding a little party at my terminal for the holidays.  Please join me by running the following command in your shell.
+
+">((while true; do echo -en "\e[31m." &gt;&2; echo; done) | (while read line; do echo -en "\e[32m."; done))
+

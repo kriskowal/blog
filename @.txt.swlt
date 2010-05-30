@@ -1,0 +1,12 @@
+^>
+    1>
+        top>>
+        left>>
+        right>>
+        bottom>>
+        noindent>1
+    />
+    template>
+        <swl /body>
+    />
+/>

@@ -1,0 +1,11 @@
+
+1> Ctrl
+
+I set up a project page for a game that Russel Palmiter wants to colaborate on.  It's at < /ctrl >.
+
+I was able to get the Wiki, Subversion repository, and Swl template set up with the same look and feel pretty quickly.  For consistency of look and feel (and admitedly laziness) I reused the framework for the main Cixar page.  Apache2 configuration was a breeze, since <tt>svn</tt> and <tt>MoinMoin</tt> (the Wiki) configurations can occupy single files in <tt>/etc/apache2/conf.d</tt>.
+
+SegPhault's working on getting mail working.  It may not work at all, but I would like to host Mailman lists off the server for these projects.  We're using DSL with a dynamic IP address, so reverse DNS lookup may be the problem, even though we have a dot com.  I dunno.  :-)
+
+At any rate, I'm going to spend some time on my sister's web template this evening (< /~rainiel >).
+

@@ -1,0 +1,8 @@
+1>Chiron Automated Tests
+
+It's worth nothing that I've posted the current < /javascript/results.html results > for automated unit testing for Javascript library.
+
+The automated test system uses a web browser, an < https://cixar.com/tracs/javascript/browser/bin/autoTestd "HTTP daemon" >, a client web page, and a batch of javascript < https://cixar.com/tracs/javascript/browser/test "unit test" > files.  A < https://cixar.com/tracs/javascript/browser/bin/autoTest script > launches the daemon with an argument list containing a manifest of all of the javascript unit test files.  The daemon serves all of the Chiron files, a logger, a reporter, and a test file-name iterator.  The script then opens a web browser and navigates to the < https://cixar.com/tracs/javascript/browser/autoTest.html "client page" >.  The client page supplants the usual <a href="https://cixar.com/tracs/javascript/browser/test.js"><tt>test.js</tt></a> module with its own <a href="https://cixar.com/tracs/javascript/browser/autoTest.js"><tt>autoTest.js</tt></a> module (in an aspect oriented fashion) so that the unit test assertions and timers get logged to the server via an HTTP request.  Then, the client page iteratively requests a test URL from the server and opens the test in a new window.  After all of the unit tests have run, the client opens the test results page.
+
+In the future, I would like to use up a database and leave the test daemon running before and after each Subversion commission so that test results can be gathered from a suite of platforms.  Then, there would be a catalog of performance and coverage trends.
+

@@ -1,0 +1,12 @@
+1>Inkscape
+
+I put < http://inkscape.org Inkscape > on my Linux box at work to play with it some time ago, but on account of that machine being particularly slow, I haven't gotten much use of it.  Today I installed it on my Windows box and am shamed for my lack of interest.  I went through a couple of the program's tutorials (basics and calligraphy) only to find that I'd been missing out on quite a bit.
+
+I'm not very familiar with Illustrator, after which this program ostensibly takes, but I do have extensive experience with Macromedia Fireworks and some with Adobe Photoshop.  While I will probably still use Fireworks for web graphics development because of its slice exporting features, Inkscape supports a stunning array of features that should have been with us from the beginning.  For one, you can manipulate paths as sets, merging them with union and intersections, allowing you to carve and build shapes.  This is a feature I've long hoped to see.  If Illustrator has these features, I never found them, and in Inkscape, they figure prominently in the interface, where they belong.
+
+But this is a trifle compared to what I discovered with the calligraphy tools.  Inkscape parameterizes your mouse gestures with "mass", "drag", "thinning", "angle" and "fixation".  These permit even the least steady mouse hand to make stunningly smooth gestures.  Mass and drag add inertia and friction to your stylus, making it steady; thinning decreases your pressure when you move quickly; and fixation determines how freely the angle of the stylus will follow the direction of your stroke.  Fixation is particularly interesting because it makes light the difference between eastern and western calligraphy.  Also, you can change the angle and width of your stylus with arrow keys, even while you draw.
+
+Here's a graphic I made in the small time I spent playing with it.
+
+<img src="/~kris.kowal/bdoc/art/inkscape-gaerdin.gif" alt="Gaerdin, as drawn in the Sindarin Mode"/>
+

@@ -1,0 +1,120 @@
+1>Programming in Javascript
+
+I'm going to attempt to explain computer programming.  This will be interesting for my sister since she's nominally curious about the topic, and as I stumble through increasingly absurd (but commonly accepted) metaphors, I'll accidentally illustrate how odd the mind of a programmer must really be.
+
+Programming is like writing a recipe book.
+
+">
+ /* this is a recipe */
+ var ingredients;
+ mix(ingredients);
+ cook();
+/>
+
+Running a program is like having a toddler make a gourmet meal by following the instructions in your recipe book (or toddlers in any number of kitchens capable of communicating with each other over the phone in ostensibly incomprehensible sequences of "gah" and "goo-goo" that mysteriously can also convey food).  The recipe book is also a "make your own ending" novel.  As the toddler reads instructions it will find "branches" like, "Making bread, step 567: to apologize to the butler, go to chapter 10.  To bludgeon the butler with a monkey-wrench, go to chapter 829." However, "branches" or "gotos" are fairly uncommon.
+
+">
+ /* this is not Javascript, but it looks a bit like it */
+ if (choice == 'apologies') {
+  goto apologies;
+ } else {
+  goto bludgeon;
+ }
+/>
+
+Recipe writers use "functions" instead.  A function is a chapter in the recipe book, a mini-recipe, wherein the author provides detailed instructions for doing things like "beat an egg".  You can tell an infant to go to any of these chapters to do some particular task and then go back to the part of the recipe where they started, like "Making bread, step 568: knead dough.  Go to chapter 12 with this dough and bring it back to step 569 when you're done."
+
+">
+ var bread = function () {
+  var eggs;
+  var flour;
+  var dough;
+  dough = mix(eggs, flour);
+  knead(dough);
+  bake(dough);
+  return dough;
+ }
+/>
+
+To keep track of where they are in the recipe, the toddler keeps a stack of dishes, upon which, the toddler arranges peas and carrots with chapter, page, and step numbers from the recipe book.
+
+">
+ I'm making bread
+  I'm mixing eggs with flour
+   I'm breaking an egg
+    I'm picking bits of shell out of the yolk
+/>
+
+This stack of dishes is often very tall.
+With Javascript, this stack is usually about 10 plates.  Apple's web browser, Safari, lets you stack 100 plates.  Firefox's implementation of Javascript lets you juggle a stack of 1000 plates.  Microsoft's Internet Explorer 6 handles 1125 plates.  Opera gives you room for a whopping 3345 plates.
+
+You might wonder why the toddler (in this case Hansel and Gretel) can't arrange the peas and carrots on the recipe book itself whenever it gets to a new chapter, letting it know where it needs to go back.  There are some tricky chapters that actually, and often by way of long paths, refer back to themselves.  These are called "recursive" functions and they have the special attribute that they must be "re-entrant", meaning that any number of toddlers can have any number of plates referring back to it without getting lost in their recipes or mixing up each other's ingredients.  Recursion is handy because you can write chapters like "Find the spoons" that go like this: "If there's more than one place to look, divide those places in half.  Find the spoons in north half.  If you don't find them there, find the spoons in the south half.  If you don't find them there, cry."  Seriously, it's handy, and if you write the chapter well enough, it'll go a lot faster than, "Look in a new place.  If you don't find the spoons, try again."
+
+">
+ var find = function (places, spoons) {
+  if (count(places) &gt; 1) {
+   try {
+    find(beginHalf(places), spoons);
+   } catch (tantrum) {
+    find(endHalf(places), spoons);
+   }
+  } else if (has(places[0], spoons)) {
+   return places[0];
+  } else {
+   throw new Tantrum("Wah!");
+  }
+ };
+/>
+
+The next nice thing about functions is that the recipes don't have to be particularly specific.  This means you could write a chapter in your recipe book entitled, "Find <i>Something</i>".  That way, the recipe writer can call for the toddler to "Find <i>Spoons</i>", "Find <i>Monkey-wrench</i>", or "Bludgeon <i>Butler</i> with <i>Monkey-wrench</i>".  Writing recipes is about being vague.  You never know when you're going to need to do something again and you don't want to write out every detail.
+
+">
+ var bludgeon = function (something) {
+ };
+/>
+
+So, you're keeping track of a lot of ingredients, so knowing what to call them can be a bit of a bear.  You want to be sure that when you call for "the apple", you don't just get any apple; it has to be the relevant apple that the toddler just skinned.  Most of the time, you keep track of names with the outline of your recipe.  If you refer to an "apple", you read backwards first in the chapter, then the book the chapter is in, then the volume.  You don't look in other chapters, books, or volumes because they might have their own apples.
+
+">
+ var volume = function () {
+  var apple = new Apple();
+  var chapter = function () {
+   var orange = new Orange();
+   var step = function () {
+    compare(apple, orange);
+   };
+  };
+ };
+/>
+
+Many languages leave it at that.  However some languages have "closures".  It's a weird word for a simple idea.  A closure is where you keep track of the plate you were on when you read the function.  Sometimes reading a function is part of the recipe.  When you do that, you're making it so that when you call that function, you can use any of the ingredients on your plate.
+
+">
+ var makeACounterFunction = function () {
+  var whereImAt = 0;
+  return function () {
+   var whereIWas = whereImAt;
+   whereImAt = whereImAt + 1;
+   return whereIWas;
+  };
+ };
+ var counterFunction = makeACounterFunction();
+ assert(counterFunction() == 0);
+ assert(counterFunction() == 1);
+ assert(counterFunction() == 2);
+/>
+
+Some languages are object oriented.  There are a lot of interesting things about object oriented programming, but the short of it is that your ingredients can each have their own recipes and sub ingredients.  You don't have to tell the function which ingredient to work on.  You can just talk about it as "this".
+
+">
+ var Egg = function () {
+  this.break = function () {
+   break(this);
+  };
+ };
+ var egg = new Egg();
+ egg.break();
+/>
+
+So, I'm going to gloss over a few details and descend into madness now.
+

@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-3897029057290219484</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;Properties come out of a tired programming language genesis.  In the beginning, there were structs.  The trouble with structs was that an opaque data structure could not programmatically monitor or intercept access and mutation of its member data.&lt;/p&gt;
+&lt;p&gt;So that's not a big deal; we could solve the problem with classes.  The best practice to avoid programming yourself into a corner was to &lt;i&gt;never&lt;/i&gt; expose a datum; you would write accessor and mutator functions, whether you needed them at the moment or not.  Thus, as your design grew, you &lt;i&gt;could&lt;/i&gt; eventually do nice things like validation, observation, or proxying.  The trouble with this approach was that you had to write six times as much code on the off chance you'd need to extend it some day.  But it was worth it.&lt;/p&gt;
+&lt;p&gt;The idea of managed properties came along eventually in various languages (Python, C#, some implementations of JavaScript, and recent versions of [C]).  The notion is that you would initially write all of your classes like structs with member data camped in public view.  You would encourage your API consumers to interact with those members directly.  Then, as need arose, you would subvert the member variables with property objects.  These objects would intercept accesses and mutations with functions that you could write at any time of your design process.&lt;/p&gt;
+&lt;p&gt;Lets observe this design shift in Python.  Here's a class with unmanaged data:&lt;/p&gt;
+
+&lt;pre&gt;
+class Foo(object):
+	def __init__(self);
+		self.bar = 10&lt;/pre&gt;
+&lt;p&gt;Here's some other fellow's code that uses your class:&lt;/p&gt;
+
+&lt;pre&gt;
+foo = Foo()
+foo.bar = 20
+print foo.bar
+del foo.bar&lt;/pre&gt;
+&lt;p&gt;So there you have it.  Just to keep on the same page, the idea at this point is to add a feature to Python that permits both of those code samples to work and, in-fact, be perfectly cromulent.  However, we also want to eventually add features to &lt;tt&gt;Foo&lt;/tt&gt; such that its &lt;tt&gt;bar&lt;/tt&gt; attribute can be managed, validated, proxied, secured, or outright lied about.  Enter &lt;tt&gt;property&lt;/tt&gt;.  &lt;tt&gt;property&lt;/tt&gt; is a function that accepts an accessor function and optional mutator and deleter functions.  The property must be a class attribute to work.  Here's how you would use a property:&lt;/p&gt;
+
+&lt;pre&gt;
+class Foo(object):
+	def __init__(self):
+		self.bar = 10
+	def get_bar(self, objekt, klass):
+		return self.baz / 2
+	def set_bar(self, objekt, value):
+		self.baz = value * 2
+	def del_bar(self, objekt):
+		del self.baz
+	bar = property(get_bar, set_bar, del_bar)&lt;/pre&gt;
+&lt;p&gt;Now we have a Foo class that transparently maintains the invariant that "bar" will always be half of "baz".&lt;/p&gt;
+&lt;p&gt;Sometimes you don't need to have a setter for a property, and you almost never need a deleter.  For the common case, you can use the &lt;tt&gt;property&lt;/tt&gt; function as a decorator.&lt;/p&gt;
+
+&lt;pre&gt;
+class Foo(object):
+	def __init__(self):
+		self.baz = 20
+	@property
+	def bar(self):
+		return self.baz / 2&lt;/pre&gt;
+
+
+&lt;h2&gt;
+	Creating the &lt;tt&gt;property&lt;/tt&gt; function.
+&lt;/h2&gt;
+&lt;p&gt;So, it's easy to assume that the &lt;tt&gt;property&lt;/tt&gt; function does all the magic behind the scenes, setting up traps in your class's accessor and mutator paths.  There's actually another layer of code that can be done entirely in Python.  That is, we can implement the &lt;tt&gt;property&lt;/tt&gt; function in pure Python.  The trick is that the &lt;tt&gt;property&lt;/tt&gt; function is actually a type or factory method (who cares which) that returns a Python duck-type: a property object.  A property object is any object that implements &lt;tt&gt;__get__&lt;/tt&gt;, &lt;tt&gt;__set__&lt;/tt&gt;, or &lt;tt&gt;__del__&lt;/tt&gt;.  These are special magic Python functions that intercept access, mutation, and deletion on members.  All you have to do is install an object on a class with one of methods defined, with the name of the member you want to manage.  The &lt;tt&gt;property&lt;/tt&gt; function just handles the common cases.  Let's redefine the property function in Python, as the &lt;tt&gt;Property&lt;/tt&gt; class.&lt;/p&gt;
+
+&lt;pre&gt;
+class Property(object):
+	def __init__(self, fget):
+		self.fget = fget
+	def __get__(self, objekt, klass):
+		return self.fget(objekt)&lt;/pre&gt;
+&lt;p&gt;This defines enough of the &lt;tt&gt;Property&lt;/tt&gt; object to decorate an accessor function.&lt;/p&gt;
+
+&lt;pre&gt;
+class Foo(object):
+	def __init__(self):
+		self.baz = 20
+	@Property
+	def bar(self):
+		return self.baz / 2&lt;/pre&gt;
+&lt;p&gt;Here's a full implementation of &lt;tt&gt;Property&lt;/tt&gt;.  You will note that, in order to exactly emulate the &lt;tt&gt;property&lt;/tt&gt; object, the &lt;tt&gt;__init__&lt;/tt&gt; method has the same argument names as the internal &lt;tt&gt;property&lt;/tt&gt; so that code that uses keyword arguments will function in perfect ambivalence.&lt;/p&gt;
+
+&lt;pre&gt;
+class Property(object):
+	def __init__(
+		self,
+		fget,
+		fset = None,
+		fdel = None,
+		doc = None,
+	):
+		self.fget = fget
+		self.fset = fset
+		self.fdel = fdel
+		self.__doc__ = doc
+	def __get__(self, objekt, klass):
+		return self.fget(objekt)
+	def __set__(self, objekt, value):
+		self.fset(objekt, value)
+	def __del__(self, objekt):
+		self.fdel(objekt)&lt;/pre&gt;
+</ns0:content><ns0:updated>2008-09-30T13:56:19.633-07:00</ns0:updated><ns0:published>2008-09-29T23:34:00.002-07:00</ns0:published><ns0:title type="text">Properties - The Python Saga - Part 3</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/3897029057290219484/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=3897029057290219484" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/3897029057290219484" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/3897029057290219484" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2008/09/properties-python-saga-part-3_29.html" rel="alternate" title="Properties - The Python Saga - Part 3" type="text/html" /></ns0:entry>

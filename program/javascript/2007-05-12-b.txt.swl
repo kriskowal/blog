@@ -1,0 +1,45 @@
+1>Javascript and Load Time
+
+I conducted a quick experiment to assess whether it is worth worrying about the size and distribution of Javascript modules.  I gathered the following numbers on my Linux box at home (fast) connected to Cixar (fast) over my home Internet connection (average today).
+
+t>
+    r>
+        ping cixar.com
+        30ms
+    />
+    r>
+        ping google.com
+        80ms
+    />
+    r>
+        HTTP overhead
+        30ms
+    />
+    r>
+        bandwidth
+        0.1KB/ms
+    />
+    r>
+        patience
+        1500ms
+    />
+    r>
+        maximum size
+        150KB
+    />
+    r>
+        Chiron core
+        100KB
+    />
+    r>
+        Chiron core shrunk
+        50KB
+    />
+    r>
+        Chiron core shrunk compressed
+        13KB
+    />
+/>
+
+I've decided not to worry about the size or distribution of Chiron until its core is five times bigger.
+

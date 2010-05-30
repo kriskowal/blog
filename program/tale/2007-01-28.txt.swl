@@ -1,0 +1,14 @@
+1>Terrain
+
+This weekend's project was to write a program to generate tiles for maps in Tale.  To this end, I needed to extract clips of trees, mountains, and mushrooms from svg files like <a href="/tale/art/terrain/tree-poplar.svg">tree-poplar.svg</a>, that include layers with "metadata" like crop boxes and "pathing" boxes.  Pathing boxes are rectangles that represent the base of a 3d object, so the umbra of a tree, for example.  The idea is that these trees, mountains, and mushrooms can be combined into terrain tiles by filling a space with their pathing boxes, then rendering the corresponding terrain features from back to front.  So, this weekend, I wrote a tool that will at length fill a region with randomly selected terrain features pared out of a given "plate" of images.  Here's the resulting mushroom forest.
+
+< /~kris.kowal/bdoc/program/tale/2007-01-28.png >
+
+< /~kris.kowal/bdoc/program/tale/2007-01-28-poplar-forest.png >
+
+The algorithm is quite slow; it has an order of complexity something like (shooting from the hip here) <tt>O(n<sup>2</sup>)</tt>.  First, I extract the clips from the SVG plate, including their pathing and crop boxes.  I populate a list with the sizes of each of the pathing boxes.  The bulk of the algorithm is taking a given region and filling it up with as many of those pathing boxes possible in a suitably random fashion.  To this end, I keep a queue of "regions" these boxes can occupy.  These regions can overlap.  I seed the queue with a single, large region.  Then, I iteratively pull a region from the queue at random, find a suitable pathing box at random, place the pathing box inside the region, and then test every region in the queue against that pathing box, breaking any region that overlaps the pathing box into smaller regions that do not overlap the pathing box.  Crawling through numerous off by one errors and infinite loops that still vex me though they're fixed, I finally managed to reliably plant a region with pathing boxes.  I then sorted the pathing boxes from back to front and composited the grand image from the corresponding clips.
+
+The next task is to set this up so that tiles can be generated incrementally throughout the world, and speed up the performance by using a quadtree, presumably the same quadtree we'll be using to distribute nodes of the world across multiple servers and organize the rooms into a hierarchical geographic grid.
+
+The other major task is reviewing the mushroom graphic for ways to make the end result prettier.  Perhaps thinner, pastel borders, and maybe some parametric color variation, or shadows.
+

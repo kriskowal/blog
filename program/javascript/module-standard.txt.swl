@@ -1,0 +1,204 @@
+1> JavaScript Module Standard
+!> vim:co=80:wrap:lbr:
+
+The purpose of this document is to propose a contract between a collection of JavaScript module loaders and modules.  The specification describes the environment that module loader implementations provide, and the environment that modules may depend upon.  In particular, compliant module systems:
+*>
+    map one file to one module (while leaving room for implementation-specific multi-module bundling for website performance),
+    cache singleton module objects before executing the corresponding module file,
+    execute modules with a feature-rich context,
+    resolve module URLs relative to a module path, and
+    conform to a domain-name-based site-package naming convention and leave a name-space for a centrally managed standard library.
+/>
+
+The specification is intended to be suitable for client- and server-side JavaScript module loader implementations.
+The specification is intended to provide insights and an easy migration path to future versions of JavaScript.
+The specification is intended to narrow the domain in which JavaScript modules can universally depend to maximize portability.
+
+The specification encourages modules to adhere to a strict subset of the JavaScript environment in which they may be loaded.  In spirit, this is a theoretical version of the JavaScript language that provides the intersection of behaviors provided by Class-A browsers and server-side run-times including Rhino, plus this system for loading modules.
+
+
+2> Module Execution Context
+
+The singleton <tt>module</tt> object MUST be declared and cached BEFORE the corresponding module file is executed.  The module file MUST only be executed ONCE for the duration of a page-view or JavaScript program.
+
+In a module file's execution context, the context object, represented by <tt>this</tt>, MUST be the <tt>module</tt> object.
+
+The scope chain, from global to local, of a module file's execution context MUST consist of:
+*>
+    <tt>builtins</tt>
+    <tt>moduleScope</tt>
+    <tt>module</tt>
+    <i>&lt;anonymous&gt;</i>
+/>
+
+3><tt>builtins</tt>
+
+Rules for module systems:
+*>
+    The <tt>builtins</tt> object MAY be frozen.
+    All objects in the transitive closure of <tt>builtins</tt> on item selection MAY be frozen.
+    The <tt>builtins</tt> object MAY contain more values than specified.
+    The <tt>builtins</tt> object MUST include:
+    *>
+        <tt>String</tt>
+        <tt>Number</tt>
+        <tt>Boolean</tt>
+        <tt>Object</tt>
+        <tt>Array</tt>
+        <tt>Date</tt>
+        <tt>RegExp</tt>
+        <tt>Error</tt>
+        <tt>EvalError</tt>
+        <tt>RangeError</tt>
+        <tt>ReferenceError</tt>
+        <tt>SyntaxError</tt>
+        <tt>TypeError</tt>
+    />
+    The module loader MAY enforce these invariants at any time.  In some environments, verifying these invariants will not be possible or pragmatic.
+    All objects in <tt>builtins</tt> MUST conform to the JavaScript subset described in the introduction: one that consists of the intersection of behaviors of the respective objects in all Grade-A browsers and server-side JavaScript environments.
+/>
+
+Rules for modules:
+*>
+    Modules MUST NOT write items to the <tt>builtins</tt> object.
+    Modules MUST NOT modify any object in the transitive closure through references on the <tt>builtins</tt> object.
+    Modules MUST NOT access any items in the <tt>builtins</tt> object not herein specified.
+    Modules MUST NOT use non-standard features provided by <tt>builtins</tt>.
+/>
+
+
+3> <tt>moduleScope</tt>
+
+The <tt>moduleScope</tt> is a module's private name-space for module loader functions and imported values.
+
+The <tt>moduleScope</tt> MUST provide:
+*>
+    <tt>builtins</tt>
+    <tt>module</tt>
+    <tt>moduleUrl</tt>
+    <tt>moduleRootUrl</tt>
+    <tt>require</tt>
+    <tt>include</tt>
+    <tt>foreignModuleBind</tt>
+    <tt>log</tt>
+/>
+
+The <tt>moduleScope</tt> MAY provide:
+*>
+    <tt>register</tt>
+    <tt>publish</tt>
+/>
+
+Modules MAY augment the <tt>moduleScope</tt> with additional items.
+
+Modules MUST NOT overwrite the items specified here.
+
+
+2> Module Loading
+
+
+3> <tt>require(</tt><i>&lt;moduleUrl&gt;</i><tt>, </tt><i>[&lt;structure&gt;]</i><tt>)</tt>
+
+The <tt>require</tt> function returns an object with items from a foreign module.  The required module is referenced with a URL.  By default, all items from the foreign module are copied into the returned object.  The returned object MAY be frozen.  Modules MUST NOT modify the returned object.  If a <tt>structure</tt> is provided, a subset of the items from the foreign module will be returned, the result of <tt>destructure(</tt><i>&lt;module&gt;</i><tt>, </tt><i>&lt;structure&gt;</i><tt>)</tt>.  If a function in the foreign module was declared with the <tt>foreignModuleBind</tt> decorator, the corresponding item in the returned object is the result of <i>&lt;foreignModule&gt;</i><tt>.moduleScope.moduleBind(</tt><i>&lt;name&gt;</i><tt>, </tt><i>&lt;value&gt;</i><tt>)</tt>.
+
+If the URL begins with a dot, ("."), the fully qualified URL for the requested module is resolved relative to the fully qualified URL of the current module.  This would be the result of <tt>urlJoin(moduleRootUrl, moduleUrl, foreignModuleUrl)</tt>.  Otherwise the fully qualified URL is <tt>urlJoin(moduleRootUrl, foreignModuleUrl)</tt>.
+
+Regarding module file names:
+*>
+    Directory components and file names in modules MUST be in <tt>camelCase</tt>.
+    Modules MUST have a ".js" extension if they are provided by files.
+    Modules MUST not have an extension if they are provided by the module loader but are not backed by real files.  This might include a "window" module in a particular browser implementation.
+    The module root is reserved for a cross-browser JavaScript standard library.
+    Modules provided by entities other than the standard library MUST exist in a subdirectory of the module root corresponding to a domain name controlled by the author, or a subdirectory thereof.
+/>
+
+Module authors are encouraged to use module relative URLs to increase the mobility of entire directory trees of modules.
+
+
+3> <tt>include(</tt><i>&lt;moduleUrl&gt;</i><tt>, </tt><i>[&lt;structure&gt;]</i><tt>)</tt>
+
+The <tt>include</tt> function defers to <tt>require</tt>, both its arguments and its return value.  However, <tt>include</tt> also copies all of the items from the object returned by <tt>require</tt> to the <tt>moduleScope</tt> object.
+
+
+3> <tt>foreignModuleBind(</tt><i>&lt;function&gt;</i><tt>)</tt>
+
+A function decorator that denotes that the module loader guarantees that, when the decorated function is called, it will receive the <tt>module</tt> object for the module file in which it was called as its context object: <tt>this</tt>.  <tt>foreignModuleBind</tt> MAY return the same <tt>Function</tt> it was passed.  The returned function MUST be usable in the module in which it was declared as if it were the function passed to <tt>foreingModuleBind</tt>.  <tt>foreignModuleBind</tt> MAY modify properties of the given <tt>Function</tt>.
+
+For example:
+">
+ this.foo = foreignModuleBind(function () {
+  log("foo called from: " + this.moduleScope.moduleUrl);
+ });
+/>
+
+
+3> <tt>destructure(</tt><i>&lt;object&gt;</i><tt>, </tt><i>&lt;structure&gt;</i><tt>)</tt>
+
+For the purpose of this specification, the "destructure" function has the following semantics.  If the structure is an <tt>Array</tt>, the returned <tt>Object</tt> contains the items from the given <i>&lt;object&gt;</i> corresponding to the keys provided in the given <tt>Array</tt> structure.  If the structure is an <tt>Object</tt>, the returned object contains items where each key corresponds to a value in the structure, and the value is a value from the object corresponding to the key in the structure.  For example:
+
+*>
+    <tt>destructure({"a": 10, "b": 20}, ["a"]) == {"a": 10}</tt>
+    <tt>destructure({"a": 10, "b": 20}, {"a": "A"}) == {"A": 10}</tt>
+/>
+
+
+3> <tt>module</tt>
+
+The <tt>module</tt> object is a module's public interface.  Adding items to the <tt>module</tt> object makes them available for export to other module scopes.  To that end, the <tt>module</tt> object is mutable.  The <tt>module</tt> object MUST provide a <tt>moduleScope</tt>.  Modules MAY augment the module object.
+
+
+3> <tt>moduleRootUrl</tt>
+<tt>moduleRootUrl</tt> is the fully qualified URL of the JavaScript site-packages directory: the module root.
+
+
+3> <tt>moduleUrl</tt>
+<tt>moduleUrl</tt> is the relative URL of the current module file relative to <tt>moduleRootUrl</tt>.
+
+
+3> <tt>log(</tt><i>&lt;message&gt;</i><tt>, </tt><i>[&lt;label&gt;]</i>)</tt>
+<tt>log</tt> is a simple console logging function.
+
+The module loader MAY ignore calls to <tt>log</tt>.  The module loader MAY ignore the label argument.
+
+The optional label MAY be any string, and MUST be suitable for use as a CSS class-name (preferably lower-case delimited by hyphens) of which the following MAY be significant:
+*>
+    info
+    warn
+    error
+    module
+    help
+    pass
+    fail
+/>
+
+
+2> Afterword: Browser Implementations
+
+This specification outlines the process of requiring modules from within other modules.  However, in a browser's global context, JavaScript execution blocks are not modules.  To that end, this specification does not require that the module loader be invoked in any particular fashion.  A particular implementation might hook an initial module to be loaded from within a script tag.  Another implementation might scan the DOM for script tags with an alternate language attribute and execute them as modules with the current page's URL as their module URL.
+
+
+2> Afterword: Future ECMAScript <tt>import</tt> semantics.
+
+A future version of the ECMAScript standard might specify new syntax and semantics for importing modules.  Current discussions about this feature trend toward having new syntax that "desugars" to native JavaScript.  To that end, I propose the following syntax and desugaring transformations in the context of this specification:
+
+*>
+    <tt>import "</tt><i>&lt;moduleUrl&gt;</i><tt>" as </tt><i>&lt;moduleName&gt;</i>;</tt>
+    <tt>module.</tt><i>&lt;moduleName&gt;</i><tt> = require("</tt><i>&lt;moduleUrl&gt;</i><tt>");</tt>
+/>
+
+*>
+    <tt>from "</tt><i>&lt;moduleUrl&gt;</i><tt>" import *;</tt>
+    <tt>include("</tt><i>&lt;moduleUrl&gt;</i><tt>");</tt>
+/>
+
+*>
+    <tt>from "</tt><i>&lt;moduleUrl&gt;</i><tt>" import </tt><i>&lt;a&gt;</i><tt>;</tt>
+    <tt>include("</tt><i>&lt;moduleUrl&gt;</i><tt>", ["</tt><i>&lt;a&gt;</i><tt>"]);</tt>
+/>
+
+*>
+    <tt>from "</tt><i>&lt;moduleUrl&gt;</i><tt>" import </tt><i>&lt;a&gt;</i><tt> as </tt><i>&lt;a&apos;&gt;</i><tt>;</tt>
+    <tt>include("</tt><i>&lt;moduleUrl&gt;</i><tt>", {"</tt><i>&lt;a&gt;</i><tt>": "</tt><i>&lt;a&apos;&gt;</i><tt>"});</tt>
+/>
+
+

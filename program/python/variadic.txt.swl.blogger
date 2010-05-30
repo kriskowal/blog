@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-4293403609558111824</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;Python supports "variadic" arguments.  Variadic arguments are the man behind the curtain for C's &lt;tt&gt;printf&lt;/tt&gt; function.  The idea is that a function can accept a variable number of positional arguments, the values to put in your format string.  In C this is accomplished with an ellipsis, &lt;tt&gt;...&lt;/tt&gt;, and some &lt;tt&gt;VA&lt;/tt&gt; macro-linked-list-stuff that I always have to look up.  Python goes a couple steps further with variadic arguments and the results are stunning, orthogonal, and &lt;i&gt;actually useful&lt;/i&gt; almost every day.  With Python, you get both "positional" arguments, like C, and keyword arguments: those arguments that conceptually map, in any order, to the names of the arguments in your function's declaration.  The magic symbols are "*" and "**" for positional and keyword arguments respectively.  With one "*", you can declare a function that accepts any number of arguments as the declared list object:&lt;/p&gt;
+
+&lt;pre&gt;
+def foo(*args):
+	return args
+assert foo(1, 2, 3) == [1, 2, 3]&lt;/pre&gt;
+&lt;p&gt;You can also pass an array of positional arguments to a function with very similar syntax:&lt;/p&gt;
+
+&lt;pre&gt;
+def foo(a, b, c):
+	print [a, b, c]
+assert foo(*[1, 2, 3]) == [1, 2, 3]&lt;/pre&gt;
+&lt;p&gt;And you can do the same thing with keyword arguments except you use dictionaries:&lt;/p&gt;
+
+&lt;pre&gt;
+def foo(**kwargs):
+	return kwargs
+assert foo(a = 10, b = 20, c = 30) == {'a': 10, 'b': 20, 'c': 30}&lt;/pre&gt;
+&lt;p&gt;Likewise, you can pass keyword arguments:&lt;/p&gt;
+
+&lt;pre&gt;
+def foo(a, b, c):
+	print [a, b, c]
+assert foo(**{'a': 10, 'b': 20, 'c': 30}) == [10, 20, 30]&lt;/pre&gt;
+&lt;p&gt;You can use them in combination, along with default arguments to provide beautiful, orthogonal, reusable abstractions:&lt;/p&gt;
+
+&lt;pre&gt;
+def foo(a, b = None, c = None, d = None):
+	return [a, b, c, d]
+assert foo(*[1, 2], **{'c': 3}) == [1, 2, 3, None]
+def bar(a, b, c, *args, **kws):
+	return [a, b, c], args, kws
+assert bar(1, 2, 3, 4, 5, f = 6) == ([1, 2, 3], [4], {'f': 5})&lt;/pre&gt;
+</ns0:content><ns0:updated>2008-09-30T13:56:17.433-07:00</ns0:updated><ns0:published>2008-09-28T00:09:00.001-07:00</ns0:published><ns0:title type="text">Variadic Positional and Keyword Arguments - The Python Saga - Part 1</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/4293403609558111824/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=4293403609558111824" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/4293403609558111824" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/4293403609558111824" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2008/09/variadic-positional-and-keyword_28.html" rel="alternate" title="Variadic Positional and Keyword Arguments - The Python Saga - Part 1" type="text/html" /></ns0:entry>

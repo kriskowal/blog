@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+from sys import *
+from os import *
+from time import *
+from datetime import *
+format = "%Y-%m-%d %H:%M:%S"
+for file_name in argv[1:]:
+    print strftime(format, localtime(stat(file_name)[9]))

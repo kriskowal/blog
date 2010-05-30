@@ -1,0 +1,34 @@
+1>Cixar Javascript Library and Names
+
+The name "Cixar Javascript Library", or CJL, has numerous virtues.  It has a three letter acronym, a full name long enough to asphyxiate a cheetah, conjures absolutely no mental image, nor alludes to any works of art or literature.
+
+I'd like to announce that, having rigorously contemplated the issue from a vantage about two feet above my naval (that is, half of a meter for our dear friends huddled safely distant from the sanity interference field), I've decided to name the Cixar Javascript Library.  My requirements are succinct:
+*>
+    one word,
+    allegorical, preferably ambiguous,
+    eminently brandable,
+    subtly humorous,
+    an alternate spelling in Unicode,
+    If possible, the name must enamour an attractive girl no more than five years older or younger than me before Monday.
+/>
+
+I browsed Wikipedia and discovered Ajax's centaur tutor, <i>Chiron</i>.  So, there you have it, the library's name is Chiron.  I leave it as an exercise for the reader and my fate/doom to discover whether it will suffice.  However, I will explicitly state that brandability is fulfilled.  Chiron, it turns out (back me up on this, Wikipedia), was really half-cow, the only Centauren to grace the Hellenic Pantheon.
+
+->>
+
+For prospective users of Chiron, I have a question of nomenclature preference.  Use of the Chiron library requires the HTML author to include exactly one <tt>script</tt> tag in their header, <a href="/tracs/javascript/browser/modules.js">modules.js</a> (13KB shrunk but not compressed).  From there the author can opt to use whatever modules they will.
+
+Central to the Chiron library is a module currently called <a href="/tracs/javascript/browser/javascript.js">javascript.js</a> that contains exceptions (<tt>KeyError</tt>), the type system (<tt>type</tt>), common types (<tt>Dict</tt>, <tt>List</tt>, <tt>Iter</tt>), and a wealth of common functions (<tt>forEach</tt>, <tt>stripEnd</tt>) (currently 36KB shrunk but not compressed).  Since I would like to give the user the option of not loading this module, most modules explicitly include it, even though in a language like Python, these primitives would be  implicitly available.
+
+I called the module <tt>javascript.js</tt> since it would include primitives that in Python would be part of the language.  In Python, this module would probably be called <tt>__builtins__.py</tt>.  In any other Javascript library, precedent suggests that that module would be called <tt>base.js</tt>.
+
+Which of the following should I call this module of language primitives?
+*>
+    <tt>javascript.js</tt>,
+    <tt>builtins.js</tt>,
+    <tt>base.js</tt>,
+    <i>your idea here</i>.
+/>
+
+Please send me an email and weigh in.
+

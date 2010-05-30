@@ -1,0 +1,8 @@
+1>Unicode
+
+What I've learned today&mdash;
+
+In order for a program or library to operate in a Unicode compatible fashion, all strings must be in Unicode.  All input strings must be brought into Unicode, and all output strings must be sent out of Unicode at the very last possible moment.  This is because, outside of Unicode strings, encoding is not a function of type and type information does not generally cross API boundaries accurately, plus regular expressions don't play well against mixed-length characters.
+
+Django works entirely in Unicode and drops a string to UTF-8 at the last moment.  I had need for Python's Textile library to transform text, but it only dealt with byte strings.  Anyhow, It turned out to be quick work to change all of its strings to unicode and not bother with encoding and decoding.
+

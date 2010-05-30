@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-2305571162502023161</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;The original &lt;tt&gt;type&lt;/tt&gt; function, whose behavior is preserved in modern Python 2.5, accepts an object and returns the class, albeit the type, that would emit it.  It's like the &lt;tt&gt;typeof&lt;/tt&gt; operator in JavaScript that returns the String name of the primitive type of an object, or the C++ function that returns a pointer to an object's virtual function table.  They're all sufficient for comparing apples to oranges, but all of them are also insufficient for the more interesting comparison of apples to the idea of a Fiji apple: the question, "Does your type inherit from this?", that can be accomplished with Python's &lt;tt&gt;isinstance&lt;/tt&gt;, JavaScript's &lt;tt&gt;instanceof&lt;/tt&gt;, or C++'s infernal &lt;tt&gt;dynamic_cast&lt;/tt&gt;.  So, &lt;tt&gt;type&lt;/tt&gt;'s single argument behavior is effectively retired.&lt;/p&gt;
+&lt;p&gt;At some transcendental moment, somebody deeply involved in the Python project must have been thinking, "Well, if functions and classes return objects, what returns a class?  Could a class, like a property, be syntactic sugar for some deeply metaphysical latent behavior in pure Python?".  I figure this is how the &lt;tt&gt;type&lt;/tt&gt; function grew its new wings.&lt;/p&gt;
+&lt;p&gt;So consider a class declaration:&lt;/p&gt;
+
+&lt;pre&gt;
+class Foo(object):
+	bar = 10
+	def __init__(self, bar = None):
+		if bar is not None:
+			self.bar = bar&lt;/pre&gt;
+&lt;p&gt;This is what is actually happening behind the curtains:&lt;/p&gt;
+
+&lt;pre&gt;
+name = 'Foo'
+bases = (object,)
+def __init__(self, bar = None):
+	if bar is not None:
+		self.bar = bar
+attys = {'bar': bar, '__init__': __init__}
+Foo = type(name, bases, attys)&lt;/pre&gt;
+&lt;p&gt;That is to say, there is no magic in the syntax.  Ultimately all of the magic happens when you call &lt;tt&gt;type&lt;/tt&gt;.  By "magic" I mean functionality that cannot be replicated in pure Python without the interpreter's intervention.&lt;/p&gt;
+&lt;p&gt;The &lt;tt&gt;type&lt;/tt&gt; function returns a type: a function that returns new instances.  It's also called a "metaclass".  &lt;tt&gt;type&lt;/tt&gt; just happens to also be the implied metaclass of &lt;tt&gt;object&lt;/tt&gt;.  That is to say, you can create your own metaclasses.&lt;/p&gt;
+&lt;p&gt;The big question about metaclasses is, "Why on earth would you want to define a metaclass?".  David Mertz from IBM wrote that you would simply know when you needed them.  Since I read that article, I've wracked my mind for a reason to use metaclasses to no avail.  At some point, I was reading Django's ORM code and it occurred to me that the reason you would want to define a metaclass is to provide a class in your API that, when subclassed by unsuspecting users, would invoke certain preparations without their knowledge or consent.  Here's how:&lt;/p&gt;
+&lt;p&gt;Define a metaclass.  The best way to define a metaclass is to inherit &lt;tt&gt;type&lt;/tt&gt; and override its &lt;tt&gt;__init__&lt;/tt&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;
+class FooType(type):
+	def __init__(self, name, bases, attys):
+		super(FooType, self).__init__(name, bases, attys)
+		print '%s was declared!' % name&lt;/pre&gt;
+&lt;p&gt;Define a base class for your API.  The trick here is that you can override its metaclass.  Let's look at this one in an interactive interpreter:&lt;/p&gt;
+
+&lt;pre&gt;
+&amp;gt;&amp;gt;&amp;gt; class Foo(object):
+...     __metaclass__ = FooType
+...
+Foo was declared!
+&amp;gt;&amp;gt;&amp;gt;&lt;/pre&gt;
+&lt;p&gt;Whoa!  You didn't call anything.  Not true.  Here's what actually happened:&lt;/p&gt;
+
+&lt;pre&gt;
+name = 'Foo'
+bases = (object,)
+attys = {}
+attys['__metaclass__'] = FooType
+Foo = attys.get('__metaclass__', type)(name, bases, attys)&lt;/pre&gt;
+&lt;p&gt;Python checks your attributes for a metaclass before defaulting to &lt;tt&gt;type&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;That means that your &lt;tt&gt;FooType.__init__&lt;/tt&gt; got called.  Hot damn.  I wonder what happens if you create a subclass.&lt;/p&gt;
+
+&lt;pre&gt;
+&amp;gt;&amp;gt;&amp;gt; class Bar(Foo):
+...     pass
+...
+Bar was declared!
+&amp;gt;&amp;gt;&amp;gt;&lt;/pre&gt;
+&lt;p&gt;Whoa!  I totally inherited a metaclass.&lt;/p&gt;
+&lt;p&gt;So, the reason for writing a metaclass is that metaclasses give you an opportunity to get and manipulate your derived class objects before anyone instantiates them.  You get to do this once, right after the class dictionary is fully populated.  You can take this opportunity to monitor class declarations, to prepare additional attributes, or to interpolate additional base types.&lt;/p&gt;
+
+
+&lt;hr&gt;
+&lt;p&gt;Keep in mind that metaclasses are jealous.  If you create a metaclass for a type that inherits from base classes in someone else's API, your metaclass must inherit from their metaclass.  I suspect that it's best not to assume that your base types use a particular metaclass.  Thankfully, you can use an expression for your base type.&lt;/p&gt;
+
+&lt;pre&gt;
+class FooType(getattr(Bar, '__metaclass__', type)):
+	pass
+class Foo(Bar):
+	__metaclass__ = FooType&lt;/pre&gt;
+&lt;p&gt;This takes advantage of the Python idiom of accessor methods like &lt;tt&gt;dict.get&lt;/tt&gt; and &lt;tt&gt;getattr&lt;/tt&gt; that accept a default-if-none-exists argument.  Unfortunately, Python's &lt;tt&gt;object&lt;/tt&gt; doesn't explicitly state that &lt;tt&gt;type&lt;/tt&gt; is its metaclass.  Otherwise, you could safely say:&lt;/p&gt;
+
+&lt;pre&gt;
+class FooType(Bar.__metaclass__):
+	pass&lt;/pre&gt;
+&lt;p&gt;Such things are to be looked for in Python 3.  I find that the Python developers have either, after considerable review and debate, already accepted or rejected most of my ideas before I even consider them, so I'm not even going to check for a PEP on this one.&lt;/p&gt;
+</ns0:content><ns0:updated>2008-10-01T14:26:30.770-07:00</ns0:updated><ns0:published>2008-09-30T22:45:00.006-07:00</ns0:published><ns0:title type="text">Metaclasses - The Python Saga - Part 4</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/2305571162502023161/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=2305571162502023161" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/2305571162502023161" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/2305571162502023161" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2008/09/metaclasses-python-saga-part-4_4744.html" rel="alternate" title="Metaclasses - The Python Saga - Part 4" type="text/html" /></ns0:entry>

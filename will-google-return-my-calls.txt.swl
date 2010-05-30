@@ -1,0 +1,15 @@
+1> Will Google Return My Call
+
+I sent my resume to < http://google.com google > last week.  I've been polling my four mail inboxes with vigor.
+
+My lab partner, Mike Andrion, and I have been meeting every evening since Tuesday to get a handle on our Minix kernel hack assignment.  It will, in the end be a magic eight ball device driver.
+">
+$ cd /dev
+$ mknod 8ball c 15 0
+>   # character device, major number 15,
+>   #  minor number unimportant
+>$ echo Are we done yet? > /dev/8ball
+$ cat /dev/8ball
+Outlook uncertain.
+/>
+

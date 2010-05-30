@@ -1,0 +1,70 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-6220983692580626210</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;For those of us who retch at the mention of both "Java" and "Javascript", today's post brings us deeper into my realm of insanity, "deep in the shit", to quote Colbert.  Yes, it's no picnic, but the development world has its human moments.  Moments where hubris, playful cynicism, and violent indignation must give way to humility.  People, harken to my words, hidden among the copious piles of refuse, there's some good code in Dojo.&lt;/p&gt;
+&lt;p&gt;Don't run off and commit resources to it; I'm just saying it's a good read for someone looking for snippets to steal.  If you need something that works today, it might be a good option, but hold your horses; I haven't finished reading the alternatives.&lt;/p&gt;
+&lt;p&gt;I've mentioned that Dojo has a module system.  It plainly doesn't meet our needs.  Let's be explicit about our requirements&lt;/p&gt;
+&lt;p&gt;Module system must:&lt;/p&gt;
+
+&lt;ul&gt;
+	&lt;li&gt;be the first and only Javascript file explicitly loaded with a script tag in the header of a document&lt;/li&gt;
+	&lt;li&gt;have a light footprint on the global context object (&lt;tt&gt;window&lt;/tt&gt; in browsers), ideally one function&lt;/li&gt;
+	&lt;li&gt;isolate each module in its own closure&lt;/li&gt;
+	&lt;li&gt;isolate each module with its own context object, preferably the module object&lt;/li&gt;
+	&lt;li&gt;leave no conditional module management code to users&lt;/li&gt;
+	&lt;li&gt;provide singleton module objects that are loaded once per page&lt;/li&gt;
+	&lt;li&gt;provide modules as shallow objects, encouraging the library user to obey the "Law of Demeter"&lt;/li&gt;
+	&lt;li&gt;handle synchronous and asynchronous pattern interface&lt;/li&gt;
+	&lt;li&gt;permit the library user to require a module under any pseudonym it desires, or vaguely, provide the flexibility of Python's &lt;tt&gt;import&lt;/tt&gt; syntax, with suitable analogs for &lt;tt&gt;import module&lt;/tt&gt;, &lt;tt&gt;import module as m&lt;/tt&gt;, &lt;tt&gt;from module import *&lt;/tt&gt;, &lt;tt&gt;from module import part as p&lt;/tt&gt;.&lt;/li&gt;
+	&lt;li&gt;permit the library user to move an entire directory of scripts without breaking any of its references to other modules within the same directory tree nor break references to global modules&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Dojo does not appear to follow all of these edicts.  For example, all modules use the global object, &lt;tt&gt;window&lt;/tt&gt;, as their context object.	Every top level module, &lt;tt&gt;dojo&lt;/tt&gt; for example, leaves a footprint on the global object.  Dojo encourages Demeter violations like, &lt;tt&gt;dojo.component.subcomponent.WhatYouReallyWant&lt;/tt&gt;.  The list of annoyances goes on.&lt;/p&gt;
+&lt;p&gt;However, Dojo does load modules synchronously, ironically with the so called "Asynchronous XML HTTP Request".  My solution in Cixar Javascript, modules load asynchronously using DOM or &lt;tt&gt;write&lt;/tt&gt; tricks.  Modules register themselves when they're text loads.  Register isolates the context object and closure.&lt;/p&gt;
+&lt;p&gt;Neither my solution nor Dojo's solution address the problem of mobile libraries.  This is a critical feature for a real module system, since it would permit authors across the web to isolate a tool in a directory and permit users to place and name that directory anywhere and any way they want without having to modify the contained code.&lt;/p&gt;
+&lt;p&gt;The problem with my system was that it requires modules have to register their location:&lt;/p&gt;
+&lt;p&gt;&lt;pre&gt;this.register('module.js', function (module) {&lt;/pre&gt;&lt;/p&gt;
+&lt;p&gt;This was necessary because of the non-blocking, asynchronous module loader.  There was no way for a Javascript to recognize what module it was supposed to be since the module scripts would load in an indeterminate order.&lt;/p&gt;
+&lt;p&gt;Enter Dojo's module loader code.  This bit of AJAX is pretty good, with lots and lots of embedded knowledge of multiple Javascript environments and their eccentricities.  Using it as a reference, I wrote a new module loader system that provides both synchronous and asynchronous forms for &lt;tt&gt;require&lt;/tt&gt;, and obviates the need for &lt;tt&gt;register&lt;/tt&gt; calls completely.&lt;/p&gt;
+&lt;p&gt;A module:&lt;/p&gt;
+
+&lt;pre&gt;
+/* import module */
+var module = require('module.js');
+
+/* import module, asynchronously */
+require('module.js', function (module) {
+});
+
+/* import module as m */
+var m = require('module.js');
+
+/* from module import * */
+with (require('module.js')) {
+}
+
+/* from module import component */
+var component = require('module.js').component;
+
+/* from module import component as c */
+var c = require("module.js').component;
+&lt;/pre&gt;
+&lt;p&gt;Most of all, the &lt;tt&gt;register&lt;/tt&gt; function no longer exists.  Modules have their own closure and singleton context object.  Modules have their own &lt;tt&gt;require&lt;/tt&gt; function so (eventually) they will be able to load modules relative to their own URL rather than the URL of the containing page.  Here's what it looks like:&lt;/p&gt;
+
+&lt;pre&gt;
+(function (url) {
+var require = function (subUrl) {...};
+eval(http.requestText(url));
+}).call(modules[url], url);&lt;/pre&gt;
+&lt;p&gt;Meanwhile, I also re-imagined Dojo's HTTP request mechanism, the heart of AJAX.  Since the module system requires HTTP requests, it creates a pseudo-module that users can later require as &lt;tt&gt;http.js&lt;/tt&gt;.  The HTTP module supports the same abbreviated syntax for both synchronous and asynchronous requests as &lt;tt&gt;require&lt;/tt&gt;, and provides forms for retrieving the HTTP response, text, XML, and the XML document element object.  The module includes most of Dojo's code paths for multiple browsers, environments, and platforms and provides a wrapper for the HTTP response object that cleaves more strictly to an observable style and handles some odd cross browser cases.&lt;/p&gt;
+
+&lt;pre&gt;
+var text = http.requestText('text.txt');
+
+http.requestXML('xml.xml', function (xml) {
+});
+
+var response = http.request('location.html');
+if (response.isOk()) {
+var text = response.getText();
+}
+&lt;/pre&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:52.170-07:00</ns0:updated><ns0:published>2007-02-26T23:30:00.001-08:00</ns0:published><ns0:title type="text">Javascript Modules Revisited</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/6220983692580626210/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=6220983692580626210" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/6220983692580626210" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/6220983692580626210" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2007/02/javascript-modules-revisited_26.html" rel="alternate" title="Javascript Modules Revisited" type="text/html" /></ns0:entry>

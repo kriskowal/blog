@@ -1,0 +1,2 @@
+#!/bin/bash
+./mtime "$1" > "$1".mtime

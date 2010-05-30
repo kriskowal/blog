@@ -1,0 +1,91 @@
+
+1> Decorators - The Python Saga - Part 2
+
+Python introduced a short-hand for the adapter pattern on functions.  You can "decorate" a function with another function.  This is a neat tool you can use to factor out some common code from a bunch of functions.  You can fiddle with the arguments, return values, or intercept exceptions thrown by any function you decorate.
+
+The canonical example is a memoize decorator.  The idea is to generalize the notion of memoization so you can simply subscribe to it in any function you want to memoize.
+
+">
+ def factorial(n):
+  if n == 1: return 1
+  return n * factorial(n - 1)
+ factorial = memoize(factorial)
+/>
+
+You accomplish this by writing the <tt>memoize</tt> decorator.  A decorator is a function that accepts a function and returns another.  Python virtuously provides a shorthand for taking the function, decorating it, and assigning it to a variable with the same name.
+
+">
+ @memoize
+ def factorial(n):
+  if n == 1: return 1
+  return n * factorial(n - 1)
+/>
+
+In the imagined normal case of decorators, the returned function accepts the same arguments and returns the same kinds of values as the accepted function.  However, a decorator does have the liberty of extending or restricting that interface, like accepting additional arguments or raising an exception if the arguments are of the wrong type.  It might also perform some common computation on the original arguments and pass the result to the original function as an additional argument.  In any case, you can use some closures to create a decorator:
+
+">
+ def memoize(function):
+  cache = {}
+  def decorated(*args):
+   if args not in cache:
+    cache[args] = function(*args)
+   return cache[args]
+  return decorated
+/>
+
+Of course, that's too simple.  A lot of things you put after the "@" symbol are just functions that return decorators so that they can be configured with arguments.  For example, you probably want to make a <tt>memoize</tt> decorator that lets you specify your own <tt>cache</tt> object.  So, you need another layer of deference.
+
+">
+ def memoize(cache = None):
+  if cache is None: cache = {}
+  def decorator(function):
+   def decorated(*args):
+    if args not in cache:
+     cache[args] = function(*args)
+    return cache[args]
+   return decorated
+  return decorator
+
+ @memoize({})
+ def factorial(n):
+  if n == 1: return 1
+  return n * factorial(n - 1)
+/>
+
+Since, in Python, functions, objects, and types are indistinguishable to the casual observer, you can do the exact same thing with a class, although I shudder to think that you might want to forgo the simplicity and elegance of closures.  After the transform, the previous code might look like this:
+
+">
+ class memoize(object):
+  def __init__(self, cache = None):
+   self.cache = cache
+  def __call__(self, function):
+   return Memoized(function, self.cache)
+
+ class Memoized(object):
+  def __init__(self, function, cache = None):
+   if cache is None: cache = {}
+   self.function = function
+   self.cache = cache
+  def __call__(self, *args):
+   if args not in self.cache:
+    self.cache[args] = self.function(*args)
+   return self.cache[args]
+
+ @memoize()
+ def factorial(n):
+  if n == 1: return 1
+  return n * factorial(n - 1)
+/>
+
+So now you can use a Least Recently Used Cache, assuming it is a dictionary-like-object (a duck-dict, if you will):
+
+">
+ from lru_cache import LruCache
+ @memoize(LruCache(max_size = 100, cull = .25))
+ def factorial(n):
+  if n == 1: return 1
+  return n * factorial(n - 1)
+/>
+
+Download <a href="/~kris.kowal/bdoc/program/python/decorators.zip">decorators.zip</a>.
+

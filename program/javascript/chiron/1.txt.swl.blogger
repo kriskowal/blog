@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-4334073455715686388</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;I'm not about to debate whether &lt;a href="http://ajaxian.com/archives/self-printing-javascript-literals"&gt;debugging&lt;/a&gt; is a valuable exercise in JavaScript, nor whether introspection or reflection tools are useful, nor whether they would be especially helpful in a dynamic language.  Ruby has &lt;tt&gt;inspect&lt;/tt&gt;.  Python has &lt;tt&gt;repr&lt;/tt&gt;.  The Chiron JavaScript library has &lt;tt&gt;repr&lt;/tt&gt; too.&lt;/p&gt;
+&lt;p&gt;Notionally, &lt;tt&gt;repr&lt;/tt&gt; is the inverse of &lt;tt&gt;eval&lt;/tt&gt; for a reasonable subset of JavaScript.  There are a lot of object hierarchies that cannot be reconstructed from a &lt;tt&gt;repr&lt;/tt&gt; serialization, but as a debugging tool, &lt;tt&gt;repr&lt;/tt&gt; is indispensable.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;repr&lt;/tt&gt; is a polymorphic function you can import from &lt;tt&gt;base.js&lt;/tt&gt;.  If you pass &lt;tt&gt;repr&lt;/tt&gt; an object that implements a &lt;tt&gt;repr&lt;/tt&gt; member function, &lt;tt&gt;repr&lt;/tt&gt; will defer to your overridable &lt;tt&gt;repr&lt;/tt&gt;.  Otherwise, &lt;tt&gt;repr&lt;/tt&gt; returns reasonable defaults for other types.  For example, &lt;tt&gt;repr&lt;/tt&gt; provides defaults for &lt;tt&gt;Array&lt;/tt&gt;, &lt;tt&gt;Object&lt;/tt&gt;, &lt;tt&gt;String&lt;/tt&gt;, &lt;tt&gt;Number&lt;/tt&gt;, &lt;tt&gt;Boolean&lt;/tt&gt;, and &lt;tt&gt;Date&lt;/tt&gt;.  &lt;tt&gt;repr&lt;/tt&gt; also recursively represents members of arrays and objects, but provides circular reference protection by tracking visited objects in a memo &lt;tt&gt;Set&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;Chiron's debugger uses &lt;tt&gt;repr&lt;/tt&gt; to convert the value of an expression on the command line to a human-readable string.&lt;/p&gt;
+
+&lt;pre&gt;
+&lt;b&gt;j$ 1&lt;/b&gt;
+1
+&lt;b&gt;j$ repr(1)&lt;/b&gt;
+"1"
+&lt;b&gt;j$ "hi"&lt;/b&gt;
+"hi"
+&lt;b&gt;j$ repr("hi")&lt;/b&gt;
+"\"hi\""
+&lt;b&gt;j$ true&lt;/b&gt;
+true
+&lt;b&gt;j$ {a: 10}&lt;/b&gt;
+{"a": 10}
+&lt;b&gt;j$ [1, 2, 3]&lt;/b&gt;
+[1, 2, 3]
+&lt;b&gt;j$ [{a: 10}]&lt;/b&gt;
+[{"a": 10}]
+&lt;b&gt;j$ var a = {}; a.a = a; a&lt;/b&gt;
+{"a": &amp;lt;cycle&amp;gt;}
+&lt;b&gt;j$ type()()&lt;/b&gt;
+&amp;lt;instance run.html#0 0&amp;gt;
+&lt;b&gt;j$ type({'repr': function () {return "x"}})()&lt;/b&gt;
+x&lt;/pre&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:47.689-07:00</ns0:updated><ns0:published>2008-02-18T11:19:00.001-08:00</ns0:published><ns0:title type="text">Polymorphic repr</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/4334073455715686388/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=4334073455715686388" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/4334073455715686388" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/4334073455715686388" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2008/02/polymorphic-repr_18.html" rel="alternate" title="Polymorphic repr" type="text/html" /></ns0:entry>

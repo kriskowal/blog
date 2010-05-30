@@ -1,0 +1,10 @@
+1>Bloody and Athsmatic
+
+Tale, like all well designed programs, has no design.  You probably wouldn't be able to tell if you looked at the code, but when it comes down to it, it is what it is, and that's the only explanation for how it got to be that way.  On the flip side, you probably could easily tell that the program has no design because it also doesn't have a release date.  This, I know, is a dubious design philosophy, but I like surprises and emergences.
+
+I was quite surprised to find that Tale was turning out to have a lot in common with a card game, in the sense that the artwork would be static, and effects would be applied by stacking and transforming graphics.  This would be analogous to blood and poison counters, "tapping" and discarding.  I find this both convenient (as a developer with limited resources) and endearing. 
+
+Today, I drafted three effects for the game.  One of which is the blood counter graphic.  It's a 20 layer image with sets of blood splatters that Tale will liberally apply as a creature takes damage.  I imagine that you won't have a chance to heal during combat, but you will be able to apply bandages.  With any luck, this will stop the bleeding until you have a chance to rest.  I also drew up a posion cloud and spore cloud.  The graphics are shown on the < https://cixar.com/tale/wiki/EffectList EffectList > on the Tale wiki.
+
+< http://cixar.com/tale/art/demo/bloody-llamacorn-400.png >
+

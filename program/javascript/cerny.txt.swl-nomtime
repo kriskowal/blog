@@ -1,0 +1,52 @@
+1>On JSON Validation
+
+:>
+<ul><i>
+    I discovered a formatting error in the source code for this post.  This is the revised version.  I've also gotten word from Robert Cerny that he has a response in the works.
+</i></ul>
+/>
+
+< http://ajaxian.com  Ajaxian > < http://ajaxian.com/archives/cernyjs-schema-for-json "recently posted" > on the topic of a validator system called < http://www.cerny-online.com/cerny.js/documentation/guides/schema Cerny.js >.  Cerny.js provides a system of object validator functions.   I commend Robert Cerny for recognizing that validators are a lot like grammars or schemas.   The system enables users to describe validators like a parser grammar or XML schema in native JavaScript objects.
+
+">
+ Person = {
+  'firstName': nonEmptyString,
+  'middleName': optional(nonEmptyString),
+  'lastName': nonEmptyString,
+  'dateOfBirth': optional(pastIsoDate)
+ };
+/>
+
+<tt>optional</tt> particularly figures in BNF grammars, sometimes represented as an expression in square brackets.  This calls into question whether the Kleene Star and Plus, among other analogs, exist.  The <tt>arrayOf</tt> method fills the role of Kleene Star ("<i>term</i>*" in BNF).  I expect that you could easily make regular expression decorators or JavaScript parser decorators.
+
+However, I think the design misses out on an opportunity to encourage the growth of a large, reusable library of validation functions.  Here's the Missing Manual, as I perceive it.
+
+In Cerny.js, a validator is a function that returns something that is vaguely false (albeit <tt>false</tt>, <tt>undefined</tt>, <tt>null</tt>, <tt>0</tt>, or a null string) when a given input is valid, or returns an error message if the input is invalid.
+
+">
+ var validateNumber = function (value) {
+  value = Number(value);
+  if (value &gt; 0 || value &lt;= 0)
+   return format("{0} is not a number.", repr(value));
+ };
+/>
+
+I'm going to assume for the moment that there was a good reason for not using exceptions.  To represent this moment, I will leave the following line blank.
+
+<br/><br/>
+
+Whatever the reason is, it's not good enough.  A validator should be a function that accepts a value and throws an exception with an appropriate and preferably localized or localizable message, regardless of what it returns.  By this convention, any matcher, parser, or evaluator would also conveniently be a validator.
+
+">
+ var validateNumber = function (value) {
+  value = Number(value);
+  if (value &gt; 0 || value &lt;= 0)
+   throw ParseError(
+    format("{0} is not a number.", repr(value))
+   );
+  return value;
+ }
+/>
+
+As long as you're designing a system for validating object hierarchies, you might as well make a design that can also subsume a system that can validate, parse, and evaluate complex strings.  That way your general purpose JSON validator can also validate user input in forms.
+

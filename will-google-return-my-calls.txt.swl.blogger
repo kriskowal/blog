@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-6114211476932005998</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;I sent my resume to &lt;a href="http://google.com"&gt;google&lt;/a&gt; last week.  I've been polling my four mail inboxes with vigor.&lt;/p&gt;
+&lt;p&gt;My lab partner, Mike Andrion, and I have been meeting every evening since Tuesday to get a handle on our Minix kernel hack assignment.  It will, in the end be a magic eight ball device driver.&lt;/p&gt;
+
+&lt;pre&gt;
+$ cd /dev
+$ mknod 8ball c 15 0
+   # character device, major number 15,
+   #  minor number unimportant
+$ echo Are we done yet? &gt; /dev/8ball
+$ cat /dev/8ball
+Outlook uncertain.&lt;/pre&gt;
+</ns0:content><ns0:updated>2008-09-30T13:59:36.307-07:00</ns0:updated><ns0:published>2005-03-03T16:55:00.000-08:00</ns0:published><ns0:title type="text">Will Google Return My Call</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/6114211476932005998/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=6114211476932005998" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/6114211476932005998" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/6114211476932005998" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2005/03/will-google-return-my-call.html" rel="alternate" title="Will Google Return My Call" type="text/html" /></ns0:entry>

@@ -1,0 +1,8 @@
+1> Got Style?
+
+There's a new JavaScript library from Google on the block.  So, I'm of course out to absorb the good bits for Chiron.  I've got to wonder some times whether people have started to use ideas from my code.
+
+Compare < http://code.google.com/p/doctype/source/browse/trunk/goog/util/uri.js#909 "this bit" > from Google's JavaScript library with < https://cixar.com/tracs/javascript/browser/trunk/src/modules.js#L1074 "this one" > in Chiron.
+
+I don't hear much about people using Chiron.  Could this be a sign that people have been reading it and absorbing the good bits?  There are other parallels.  For example, some of the function names and file names match up with Chiron too, like <tt>base.js</tt> and <tt>inherits</tt> (instead of Doug Crockford's recommended term, <tt>begets</tt>).
+

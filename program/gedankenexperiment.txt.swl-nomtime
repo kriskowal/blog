@@ -1,0 +1,12 @@
+1>Gedankenexperiment 1
+
+">
+ open("foo")
+ &lt;open&gt;foo&lt;/open&gt;
+/>
+
+">
+ open("foo")open
+ &lt;open&gt;foo&lt;/&gt;
+/>
+

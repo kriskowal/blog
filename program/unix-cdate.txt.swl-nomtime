@@ -1,0 +1,15 @@
+1>Questions That Ought Be Asked More Frequently
+
+From the Department of Questions That Ought Be Asked More Frequently, "Why?  For emphasis, I repeat: Why?  Why, oh why, do standard Unix file systems not track the creation date of files?"
+
+Email me if you happen to know, but here are some answers that will not sate my curiosity/indignation:
+#>
+    Tracking the creation date would cause a semantic collision since "cdate" is already the term for the date that a node was most recently touched.  We've used "m" and "c" which for all intents and purposes precludes the use of other letters, and we certainly wouldn't want to use a full word.
+    No one would use them.  For example, people writing blog software would have especially little use for knowing when a post was created, nor differentiating said date from the date the file was last modified or touched.
+    What with our 4KB block sizes that on average waste 2KB of vacuum on every file, we don't have room for another word.
+    Tracking creation dates would be too high maintenance.  Setting a value once and never touching it again would cause severe angst for kernel programmers, and let's face it, they need all the love they can get.  "It's the beards."
+    Programmers wouldn't be able to use it until the technology proliferated.  For example, no stopgap hacks, like a kernel module that maintains an extended attribute, nor a task that in the worst case would drop a <tt>.createdDate</tt> when <tt>creat</tt> gets called.  (Aside, <tt>create</tt>?  I hear that Ken cites this as his greatest regret).
+    Standards compliance.  No.
+/>
+
+I also welcome commiseration.

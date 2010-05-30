@@ -1,0 +1,47 @@
+
+^>
+    defs>
+        top><dl>
+        left><dt><tt>
+        colon></tt></dt><dd>
+        right></dd>
+        bottom></dl>
+    />
+/>
+
+1>De Schpugeti
+
+You've heard of syntactic sugar.  After a syntax and vocabulary provides all of the normal forms necessary to express all of the programs possible in a language, yummy shortcuts bridge the gap between expressiveness and usability.  For example, <tt>c++</tt> is a delicious variation of <tt>(temp = c, c = c + 1, temp)</tt>.
+
+You've also heard of CRUD, an acronym for the normal forms for a data programming interface (databases, data structures).  If you design an interface library for data and fail to cover all of these bases, you deserve what's coming to you&nbsp;&mdash;&nbsp;and I can't promise that it won't involve a big hole in the ground and Hello Kitty.
+
+CRUD stands for <tt><u>c</u>reate</tt>, <tt><u>r</u>ead</tt>, <tt><u>u</u>pdate</tt>, and <tt><u>d</u>elete</tt>.  Those functions encompass all of the necessary data interactions; however, they are not sufficient.  While CRUD may provide all the nutrients, vitamins, and minerals your data API might need, it certainly won't taste good without sugar.
+
+<i>Enter: Chiron</i>.
+
+<tt><u>de</u>l, <u>s</u>et, <u>c</u>ut, <u>h</u>as, <u>pu</u>t, <u>get</u></tt>.  De Schpugeti.  All of these names are three letters long, should be familiar by their names, and are sufficient in addition to necessary.  These methods are the interface of Chiron's <tt>Dict</tt>, for manipulating item data: data that have keys and corresponding values.  They are also implemented in a consistent manner by <tt>List</tt> presuming that indices are like keys.
+
+defs>
+    del: Deletes an item for a key.<br/>Returns the mutated collection.<br/>For ordered collections, accepts a beginning key and an ending key, deleting all items in that range of keys excluding the ending key.<br/>Implemented in terms of <tt>remove</tt>.
+    set: Adds or overwrites an item for a key.<br/>Returns the mutated collection.<br/>Implemented in terms of <tt>insert</tt>.
+    cut: Deletes an item for a key.<br/>Throws a key error of no item has that key.<br/>Returns the corresponding value.<br/>Implemented in terms of <tt>get</tt> and <tt>del</tt>.
+    has: Returns whether key is among items.<br/>Implemented in terms of <tt>has</tt>.
+    put: Adds an item for a key.<br/>Throws a key error if there is already an item with that key.  returns the mutated collection.<br/>In an ordered collection, reserves the right to change the keys of some other items to make room for the new item.<br/>Implemented in terms of <tt>set</tt> and <tt>has</tt>.
+    get: Returns a value for the given key.<br/>Throws a key error if there is no value for the given key.<br/>Implemented in terms of retrieve and <tt>has</tt>.
+/>
+
+Also, <tt>List</tt>s, <tt>Set</tt>s, and, by extension, <tt>Dict</tt>s have functions for managing collections of values that do not have keys.  <tt>Dict</tt> is a <tt>Set</tt> of items instead of mere values that are compared and hashed on their key.
+
+defs>
+    has: Returns whether a collection contains a particular value.
+    insert: Adds or overwrites a value.<br/>Returns the mutated collection.<br/>Defaults to an implementation in terms of <tt>find</tt> and <tt>set</tt>.
+    retrieve: Returns the contained value that is naturally equivalent to a given value.<br/>Throws a value error if none exists.<br/>Defaults to an implementation in terms of <tt>find</tt> and <tt>get</tt>.
+    remove: Removes a value.<br/>Throws a value error if the value isn't in the collection.<br/>Returns the mutated collection.<br/>Defaults to an implementation in terms of <tt>find</tt> and <tt>del</tt>.
+    discard: Removes a value if it exists.<br/>Returns the mutated collection.<br/>Implemented in terms of <tt>has</tt> and <tt>remove</tt>.
+    find: Returns the key for a given value.<br/>Accepts an optional equivalence relation to override the default of <tt>eq</tt>.
+/>
+
+Now accepting ideas for a good mnemonic.
+
+The fun trick is that <tt>List</tt>, <tt>Dict</tt>, and <tt>Set</tt> implement all of these functions.  While it may be more appropriate to use one collection type for one kind of data or one algorithm, you can use any of these types interchangeably.
+

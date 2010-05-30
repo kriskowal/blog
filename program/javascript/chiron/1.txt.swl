@@ -1,0 +1,35 @@
+1>Polymorphic <tt>repr</tt>
+
+I'm not about to debate whether < http://ajaxian.com/archives/self-printing-javascript-literals debugging > is a valuable exercise in JavaScript, nor whether introspection or reflection tools are useful, nor whether they would be especially helpful in a dynamic language.  Ruby has <tt>inspect</tt>.  Python has <tt>repr</tt>.  The Chiron JavaScript library has <tt>repr</tt> too.
+
+Notionally, <tt>repr</tt> is the inverse of <tt>eval</tt> for a reasonable subset of JavaScript.  There are a lot of object hierarchies that cannot be reconstructed from a <tt>repr</tt> serialization, but as a debugging tool, <tt>repr</tt> is indispensable.
+
+<tt>repr</tt> is a polymorphic function you can import from <tt>base.js</tt>.  If you pass <tt>repr</tt> an object that implements a <tt>repr</tt> member function, <tt>repr</tt> will defer to your overridable <tt>repr</tt>.  Otherwise, <tt>repr</tt> returns reasonable defaults for other types.  For example, <tt>repr</tt> provides defaults for <tt>Array</tt>, <tt>Object</tt>, <tt>String</tt>, <tt>Number</tt>, <tt>Boolean</tt>, and <tt>Date</tt>.  <tt>repr</tt> also recursively represents members of arrays and objects, but provides circular reference protection by tracking visited objects in a memo <tt>Set</tt>.
+
+Chiron's debugger uses <tt>repr</tt> to convert the value of an expression on the command line to a human-readable string.
+
+">
+ <b>j$ 1</b>
+ 1
+ <b>j$ repr(1)</b>
+ "1"
+ <b>j$ "hi"</b>
+ "hi"
+ <b>j$ repr("hi")</b>
+ "\"hi\""
+ <b>j$ true</b>
+ true
+ <b>j$ {a: 10}</b>
+ {"a": 10}
+ <b>j$ [1, 2, 3]</b>
+ [1, 2, 3]
+ <b>j$ [{a: 10}]</b>
+ [{"a": 10}]
+ <b>j$ var a = {}; a.a = a; a</b>
+ {"a": &lt;cycle&gt;}
+ <b>j$ type()()</b>
+ &lt;instance run.html#0 0&gt;
+ <b>j$ type({'repr': function () {return "x"}})()</b>
+ x
+/>
+

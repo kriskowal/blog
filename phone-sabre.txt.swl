@@ -1,0 +1,8 @@
+1> It Shtarts with a Bloody Esh.
+
+The light saber application for the iPhone was recently "upgraded" to a naggy advertisement application for a game that I will not give the benefit of calling out by name.  If, like me, you need to "downgrade" your iPhone application, fear not, there is a way.
+
+If you upgraded the application directly on the phone, the old version may be backed up on your main iTunes library.  If you have docked since you got the application originally, and have not docked since you upgraded, just delete the application from your phone then dock and sync.  The old version will be restored.
+
+If you have already docked and synced your iPhone with your iTunes library, it will appear that the new application is both on your phone and your computer with no sign of the old one.  Check the trash&mdash;it might still be there.  Copy the <tt>.ipa</tt> (<u>iP</u>one <u>A</u>pp) file for your application to your <tt>iTunes/Mobile Applications</tt> directory and open it in iTunes.  It will prompt you for whether you would like to replace the newer version.  Just say, "YES!".
+

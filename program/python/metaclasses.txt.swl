@@ -1,0 +1,99 @@
+
+1> Metaclasses - The Python Saga - Part 4
+
+The original <tt>type</tt> function, whose behavior is preserved in modern Python 2.5, accepts an object and returns the class, albeit the type, that would emit it.  It's like the <tt>typeof</tt> operator in JavaScript that returns the String name of the primitive type of an object, or the C++ function that returns a pointer to an object's virtual function table.  They're all sufficient for comparing apples to oranges, but all of them are also insufficient for the more interesting comparison of apples to the idea of a Fiji apple: the question, "Does your type inherit from this?", that can be accomplished with Python's <tt>isinstance</tt>, JavaScript's <tt>instanceof</tt>, or C++'s infernal <tt>dynamic_cast</tt>.  So, <tt>type</tt>'s single argument behavior is effectively retired.
+
+At some transcendental moment, somebody deeply involved in the Python project must have been thinking, "Well, if functions and classes return objects, what returns a class?  Could a class, like a property, be syntactic sugar for some deeply metaphysical latent behavior in pure Python?".  I figure this is how the <tt>type</tt> function grew its new wings.
+
+So consider a class declaration:
+">
+ class Foo(object):
+  bar = 10
+  def __init__(self, bar = None):
+   if bar is not None:
+    self.bar = bar
+/>
+
+This is what is actually happening behind the curtains:
+
+">
+ name = 'Foo'
+ bases = (object,)
+ def __init__(self, bar = None):
+  if bar is not None:
+   self.bar = bar 
+ attys = {'bar': bar, '__init__': __init__}
+ Foo = type(name, bases, attys)
+/>
+
+That is to say, there is no magic in the syntax.  Ultimately all of the magic happens when you call <tt>type</tt>.  By "magic" I mean functionality that cannot be replicated in pure Python without the interpreter's intervention.
+
+The <tt>type</tt> function returns a type: a function that returns new instances.  It's also called a "metaclass".  <tt>type</tt> just happens to also be the implied metaclass of <tt>object</tt>.  That is to say, you can create your own metaclasses.
+
+The big question about metaclasses is, "Why on earth would you want to define a metaclass?".  David Mertz from IBM wrote that you would simply know when you needed them.  Since I read that article, I've wracked my mind for a reason to use metaclasses to no avail.  At some point, I was reading Django's ORM code and it occurred to me that the reason you would want to define a metaclass is to provide a class in your API that, when subclassed by unsuspecting users, would invoke certain preparations without their knowledge or consent.  Here's how:
+
+Define a metaclass.  The best way to define a metaclass is to inherit <tt>type</tt> and override its <tt>__init__</tt> method.
+
+">
+ class FooType(type):
+  def __init__(self, name, bases, attys):
+   super(FooType, self).__init__(name, bases, attys)
+   print '%s was declared!' % name
+/>
+
+Define a base class for your API.  The trick here is that you can override its metaclass.  Let's look at this one in an interactive interpreter:
+
+">
+ &gt;&gt;&gt; class Foo(object):
+ ...     __metaclass__ = FooType
+ ...
+ Foo was declared!
+ &gt;&gt;&gt; 
+/>
+
+Whoa!  You didn't call anything.  Not true.  Here's what actually happened:
+
+">
+ name = 'Foo'
+ bases = (object,)
+ attys = {}
+ attys['__metaclass__'] = FooType
+ Foo = attys.get('__metaclass__', type)(name, bases, attys)
+/>
+
+Python checks your attributes for a metaclass before defaulting to <tt>type</tt>.
+
+That means that your <tt>FooType.__init__</tt> got called.  Hot damn.  I wonder what happens if you create a subclass.
+
+">
+ &gt;&gt;&gt; class Bar(Foo):
+ ...     pass
+ ...
+ Bar was declared!
+ &gt;&gt;&gt; 
+/>
+
+Whoa!  I totally inherited a metaclass.
+
+So, the reason for writing a metaclass is that metaclasses give you an opportunity to get and manipulate your derived class objects before anyone instantiates them.  You get to do this once, right after the class dictionary is fully populated.  You can take this opportunity to monitor class declarations, to prepare additional attributes, or to interpolate additional base types.
+
+->>
+
+Keep in mind that metaclasses are jealous.  If you create a metaclass for a type that inherits from base classes in someone else's API, your metaclass must inherit from their metaclass.  I suspect that it's best not to assume that your base types use a particular metaclass.  Thankfully, you can use an expression for your base type.
+
+">
+ class FooType(getattr(Bar, '__metaclass__', type)):
+  pass
+ class Foo(Bar):
+  __metaclass__ = FooType
+/>
+
+This takes advantage of the Python idiom of accessor methods like <tt>dict.get</tt> and <tt>getattr</tt> that accept a default-if-none-exists argument.  Unfortunately, Python's <tt>object</tt> doesn't explicitly state that <tt>type</tt> is its metaclass.  Otherwise, you could safely say:
+
+">
+ class FooType(Bar.__metaclass__):
+  pass
+/>
+
+Such things are to be looked for in Python 3.  I find that the Python developers have either, after considerable review and debate, already accepted or rejected most of my ideas before I even consider them, so I'm not even going to check for a PEP on this one.
+

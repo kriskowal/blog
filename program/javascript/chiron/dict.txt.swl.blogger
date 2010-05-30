@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-7268347540627294617</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;Chiron's &lt;tt&gt;base&lt;/tt&gt; module provides bot a &lt;tt&gt;dict&lt;/tt&gt; operator and a &lt;tt&gt;Dict&lt;/tt&gt; factory method, as well as &lt;tt&gt;List&lt;/tt&gt; and &lt;tt&gt;list&lt;/tt&gt;, and analogously &lt;tt&gt;Set&lt;/tt&gt; and &lt;tt&gt;unique&lt;/tt&gt;.  &lt;tt&gt;Dict&lt;/tt&gt; and &lt;tt&gt;dict&lt;/tt&gt; both accept the same basic types.&lt;/p&gt;
+
+&lt;pre&gt;
+dict({a: 10}) =
+Dict({a: 10}) =
+Dict([["a", 10]])&lt;/pre&gt;
+
+&lt;pre&gt;
+dict("abc") =
+Dict("abc") =
+Dict([[0, "a"], [1, "b"], [2, "c"]]) =
+dict(["a", "b", "c"]) =
+Dict(["a", "b", "c"]) =
+Dict(iter("abc"))&lt;/pre&gt;
+&lt;p&gt;In code, the difference is that &lt;tt&gt;Dict&lt;/tt&gt; is a &lt;tt&gt;type&lt;/tt&gt; and &lt;tt&gt;dict&lt;/tt&gt; is an &lt;tt&gt;operator&lt;/tt&gt;.  The difference in practice is that &lt;tt&gt;dict&lt;/tt&gt; first checks whether the first argument is a subtype of &lt;tt&gt;Base&lt;/tt&gt; (which includes all objects using the &lt;tt&gt;type&lt;/tt&gt; system), and whether it implements a &lt;tt&gt;dict&lt;/tt&gt; method.  If so, it defers to that polymorphic &lt;tt&gt;dict&lt;/tt&gt; method.  Otherwise, it defers to &lt;tt&gt;Dict&lt;/tt&gt;.&lt;/p&gt;
+
+&lt;pre&gt;
+var base = require('./base');
+var test = require('./test');
+exports.Foo = base.type(function (self, supr) {
+	self.dict = function () {
+		return base.Dict({'a': 10});
+	};
+});
+var foo = exports.Foo();
+test.assertEq(
+	base.dict(foo),
+	base.Dict({'a': 10}),
+	'dict behaves as a polymorphic operator'
+);&lt;/pre&gt;
+&lt;p&gt;The same difference applies to the polymorphic operators &lt;tt&gt;unique&lt;/tt&gt; (that defers to &lt;tt&gt;Set&lt;/tt&gt; if &lt;tt&gt;unique&lt;/tt&gt; is not a member of the type), or &lt;tt&gt;list&lt;/tt&gt; (that defers to &lt;tt&gt;List&lt;/tt&gt; if &lt;tt&gt;list&lt;/tt&gt; is not a member of the type).  &lt;tt&gt;object&lt;/tt&gt; and &lt;tt&gt;array&lt;/tt&gt; are also polymorphic operators that work as copy constructors for &lt;tt&gt;Object&lt;/tt&gt; and &lt;tt&gt;Array&lt;/tt&gt;, but also defer to polymorphic &lt;tt&gt;object&lt;/tt&gt; and &lt;tt&gt;array&lt;/tt&gt; members.  The default behaviors of &lt;tt&gt;object&lt;/tt&gt; and &lt;tt&gt;array&lt;/tt&gt; are to copy or coerce the argument to an &lt;tt&gt;Object&lt;/tt&gt; or &lt;tt&gt;Array&lt;/tt&gt;, since &lt;tt&gt;Object&lt;/tt&gt; and &lt;tt&gt;Array&lt;/tt&gt; cannot be used as copy constructors themselves.  A complete variety of coercions are possible, extending well into the bizarre and insane.&lt;/p&gt;
+
+&lt;pre&gt;
+array("abc") =
+["a", "b", "c"]&lt;/pre&gt;
+
+&lt;pre&gt;
+object([1, 2, 3]) =
+{'0': 1, '1': 2, '2': 3}&lt;/pre&gt;
+</ns0:content><ns0:updated>2009-03-08T16:51:07.587-07:00</ns0:updated><ns0:published>2009-03-08T16:56:00.000-07:00</ns0:published><ns0:title type="text">Dict versus dict</ns0:title><ns0:link href="https://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=7268347540627294617" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/7268347540627294617" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/7268347540627294617" rel="self" type="application/atom+xml" /><ns1:total xmlns:ns1="http://purl.org/syndication/thread/1.0">0</ns1:total></ns0:entry>

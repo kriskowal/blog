@@ -1,0 +1,85 @@
+1>Javascript Modules Revisited
+
+For those of us who retch at the mention of both "Java" and "Javascript", today's post brings us deeper into my realm of insanity, "deep in the shit", to quote Colbert.  Yes, it's no picnic, but the development world has its human moments.  Moments where hubris, playful cynicism, and violent indignation must give way to humility.  People, harken to my words, hidden among the copious piles of refuse, there's some good code in Dojo.
+
+Don't run off and commit resources to it; I'm just saying it's a good read for someone looking for snippets to steal.  If you need something that works today, it might be a good option, but hold your horses; I haven't finished reading the alternatives.
+
+I've mentioned that Dojo has a module system.  It plainly doesn't meet our needs.  Let's be explicit about our requirements
+
+Module system must:
+*>
+	be the first and only Javascript file explicitly loaded with a script tag in the header of a document
+	have a light footprint on the global context object (<tt>window</tt> in browsers), ideally one function
+	isolate each module in its own closure
+	isolate each module with its own context object, preferably the module object
+	leave no conditional module management code to users
+	provide singleton module objects that are loaded once per page
+	provide modules as shallow objects, encouraging the library user to obey the "Law of Demeter"
+	handle synchronous and asynchronous pattern interface
+	permit the library user to require a module under any pseudonym it desires, or vaguely, provide the flexibility of Python's <tt>import</tt> syntax, with suitable analogs for <tt>import module</tt>, <tt>import module as m</tt>, <tt>from module import *</tt>, <tt>from module import part as p</tt>.
+	permit the library user to move an entire directory of scripts without breaking any of its references to other modules within the same directory tree nor break references to global modules
+/>
+
+Dojo does not appear to follow all of these edicts.  For example, all modules use the global object, <tt>window</tt>, as their context object.	Every top level module, <tt>dojo</tt> for example, leaves a footprint on the global object.  Dojo encourages Demeter violations like, <tt>dojo.component.subcomponent.WhatYouReallyWant</tt>.  The list of annoyances goes on.
+
+However, Dojo does load modules synchronously, ironically with the so called "Asynchronous XML HTTP Request".  My solution in Cixar Javascript, modules load asynchronously using DOM or <tt>write</tt> tricks.  Modules register themselves when they're text loads.  Register isolates the context object and closure.
+
+Neither my solution nor Dojo's solution address the problem of mobile libraries.  This is a critical feature for a real module system, since it would permit authors across the web to isolate a tool in a directory and permit users to place and name that directory anywhere and any way they want without having to modify the contained code.
+
+The problem with my system was that it requires modules have to register their location:
+<pre>this.register('module.js', function (module) {</pre>
+
+This was necessary because of the non-blocking, asynchronous module loader.  There was no way for a Javascript to recognize what module it was supposed to be since the module scripts would load in an indeterminate order.
+
+Enter Dojo's module loader code.  This bit of AJAX is pretty good, with lots and lots of embedded knowledge of multiple Javascript environments and their eccentricities.  Using it as a reference, I wrote a new module loader system that provides both synchronous and asynchronous forms for <tt>require</tt>, and obviates the need for <tt>register</tt> calls completely.
+
+A module:
+:>
+<pre>
+/* import module */
+var module = require('module.js');
+
+/* import module, asynchronously */
+require('module.js', function (module) {
+});
+
+/* import module as m */
+var m = require('module.js');
+
+/* from module import * */
+with (require('module.js')) {
+}
+
+/* from module import component */
+var component = require('module.js').component;
+
+/* from module import component as c */
+var c = require("module.js').component;
+</pre>
+/>
+
+Most of all, the <tt>register</tt> function no longer exists.  Modules have their own closure and singleton context object.  Modules have their own <tt>require</tt> function so (eventually) they will be able to load modules relative to their own URL rather than the URL of the containing page.  Here's what it looks like:
+
+">
+(function (url) {
+	var require = function (subUrl) {...};
+	eval(http.requestText(url));
+}).call(modules[url], url);
+/>
+
+Meanwhile, I also re-imagined Dojo's HTTP request mechanism, the heart of AJAX.  Since the module system requires HTTP requests, it creates a pseudo-module that users can later require as <tt>http.js</tt>.  The HTTP module supports the same abbreviated syntax for both synchronous and asynchronous requests as <tt>require</tt>, and provides forms for retrieving the HTTP response, text, XML, and the XML document element object.  The module includes most of Dojo's code paths for multiple browsers, environments, and platforms and provides a wrapper for the HTTP response object that cleaves more strictly to an observable style and handles some odd cross browser cases. 
+
+:>
+<pre>
+var text = http.requestText('text.txt');
+
+http.requestXML('xml.xml', function (xml) {
+});
+
+var response = http.request('location.html');
+if (response.isOk()) {
+ var text = response.getText();
+}
+</pre>
+/>
+

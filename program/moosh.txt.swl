@@ -1,0 +1,7 @@
+1>Moosh
+
+I have posted < /moosh/ Moosh >, the Moo Graphical Shell, as a reincarnation of the MAGE client for Magic of Middle Earth.  Moosh is a Firefox extension that adds the <tt>sh:</tt> protocol to < http://www.mozilla.org/products/firefox/ Firefox >, which permits you to log into M.M.E with a URL, < sh://cixar.com >.  < /moosh/ "Try it out" >.
+
+Moosh, at the moment, is merely a graphical shell platform on which we intend to build a local graphical shell with a < /moot/Moo Moo >/< /moot/Swil Swil > idealized syntax.  Ryan Paul has also suggested that we might use this platform for a non-interactive telnet client, for logging into MUDs or any telnet service with line-buffering.
+
+

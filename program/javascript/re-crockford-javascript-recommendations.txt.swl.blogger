@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:entry xmlns:ns0="http://www.w3.org/2005/Atom"><ns0:id>tag:blogger.com,1999:blog-3618780804544792727.post-8512448541777321971</ns0:id><ns0:author><ns0:name>Kris Kowal</ns0:name><ns0:email>cowbertvonmoo@gmail.com</ns0:email><ns0:uri>http://www.blogger.com/profile/01443956999129365941</ns0:uri></ns0:author><ns0:content type="html">
+&lt;p&gt;&lt;a href="http://www.crockford.com/"&gt;Doug Crockford&lt;/a&gt; has posted some &lt;a href="http://javascript.crockford.com/recommend.html"&gt;recommendations&lt;/a&gt; to improve JavaScript.&lt;/p&gt;
+&lt;p&gt;I have some comments in the context of my experience with live-patching JavaScript issues with libraries.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	New Features
+&lt;/h2&gt;
+
+
+&lt;h3&gt;
+	Function Reflection
+&lt;/h3&gt;
+&lt;p&gt;Doug recommends that function objects contain a "name" property.  Some versions of JavaScript actually have this already.  This could be handy but I haven't needed this and would not be likely to use it.  I was surprised that FireFox had this when I used a &lt;tt&gt;Function&lt;/tt&gt; in a &lt;tt&gt;with&lt;/tt&gt; block.  I've learned my lesson.&lt;/p&gt;
+&lt;p&gt;However, Doug also recommends the addition of an &lt;tt&gt;arguments&lt;/tt&gt; member to &lt;tt&gt;Function&lt;/tt&gt; objects.  This is a critical feature.  The &lt;tt&gt;arguments&lt;/tt&gt; array would contain the names of all of the functions declared argument variables.  &lt;tt&gt;Function&lt;/tt&gt; objects already have a &lt;tt&gt;length&lt;/tt&gt; member that corresponds to the length of this hypothetical &lt;tt&gt;arguments&lt;/tt&gt; array.  There was some &lt;a href="http://ejohn.org/blog/javascript-method-overloading/"&gt;buzz&lt;/a&gt; about using this value for method overloading and it permitted me to create an elegant &lt;a href="https://cixar.com/tracs/javascript/browser/trunk/src/base.js?rev=328#L1437"&gt;partial application decorator&lt;/a&gt;.  If we had access to the names of a function's argument declarations, I could implement a decorator for supporting Python-style positional and named arguments.  Decorated functions would accept an array/list of positional arguments and an object/dict/map of keyword arguments and the decorator would translate them to an array for a wrapped &lt;tt&gt;Function.apply&lt;/tt&gt;.  That decorator or further decorators could support default values and automatic argument length assertions.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;typeOf&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;Doug notes that JavaScript's &lt;tt&gt;typeof&lt;/tt&gt; "function" is broken because it returns the wrong strings for &lt;tt&gt;null&lt;/tt&gt; and arrays.  All that and he hints that using camelCase instead of lowercase would have been more in keeping with the language's aesthetic.  He recommends that we deprecate &lt;tt&gt;typeof&lt;/tt&gt; and replace it with a fixed version called &lt;tt&gt;typeOf&lt;/tt&gt;.  I would go a step further.  &lt;tt&gt;typeof&lt;/tt&gt; returns a string.  I propose that it ought to return the type object.  This would jive well with &lt;tt&gt;instanceof&lt;/tt&gt;, &lt;tt&gt;instanceOf&lt;/tt&gt;, or &lt;tt&gt;isInstance&lt;/tt&gt;.  This means there should be a &lt;tt&gt;Null&lt;/tt&gt; type that would construct &lt;tt&gt;null&lt;/tt&gt; and an &lt;tt&gt;Undefined&lt;/tt&gt; type to construct &lt;tt&gt;undefined&lt;/tt&gt;.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Object Methods
+&lt;/h2&gt;
+
+
+&lt;h3&gt;
+	Don't Enum
+&lt;/h3&gt;
+&lt;p&gt;I don' particularly care whether &lt;tt&gt;Object&lt;/tt&gt; has a &lt;tt&gt;dontEnum&lt;/tt&gt; method since I don't augment base types and wrap them when I need reliable collection types, but this would help ameliorate integration woes with prototype so it's a good idea.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	Array of Keys
+&lt;/h3&gt;
+&lt;p&gt;Doug wants a &lt;tt&gt;Object.arrayOfKeys&lt;/tt&gt; method.  I want a &lt;tt&gt;keys&lt;/tt&gt; method that returns a &lt;tt&gt;Set&lt;/tt&gt;.  I would also like &lt;tt&gt;keysIter&lt;/tt&gt; and, less emphatically, &lt;tt&gt;keysArray&lt;/tt&gt;.  I don't want the name &lt;tt&gt;arrayOfKeys&lt;/tt&gt; because it introduces an unnecessary &lt;tt&gt;Of&lt;/tt&gt; and doesn't sort as well as &lt;tt&gt;keys*&lt;/tt&gt;.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	Array of Values.
+&lt;/h3&gt;
+&lt;p&gt;Doug also wants &lt;tt&gt;Object.arrayOfValues&lt;/tt&gt;.  I want &lt;tt&gt;values&lt;/tt&gt; and &lt;tt&gt;valuesIter&lt;/tt&gt;.  These should return &lt;tt&gt;Array&lt;/tt&gt; and &lt;tt&gt;Iter&lt;/tt&gt; object respectively.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	toJsonString
+&lt;/h3&gt;
+&lt;p&gt;&lt;tt&gt;Object.toJSONString(memberName)&lt;/tt&gt;.  The first thing that comes to mind to improve this idea is to rename it &lt;tt&gt;toJsonString&lt;/tt&gt;; I prefer to consider acronyms words and I would have also called &lt;tt&gt;XMLHttpRequest&lt;/tt&gt; &lt;tt&gt;XmlHttpRequest&lt;/tt&gt;.  This name jives well with &lt;tt&gt;toString&lt;/tt&gt;, but I would have called that &lt;tt&gt;string&lt;/tt&gt;.  But, I actually would call this &lt;tt&gt;repr&lt;/tt&gt; and made it a global function.  &lt;tt&gt;repr&lt;/tt&gt; would work on arbitrary objects, a subset of which would be serializable JSON.  The behavior of &lt;tt&gt;repr&lt;/tt&gt; would be overridable by providing a &lt;tt&gt;repr&lt;/tt&gt; method on an object.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	Beget Object
+&lt;/h3&gt;
+&lt;p&gt;Doug recommends that Prototype inheritance be a little more lucid by providing a &lt;tt&gt;beget&lt;/tt&gt; function that returns a new, empty &lt;tt&gt;Object&lt;/tt&gt; that inherits from the previous.  I like this idea.  I called it &lt;tt&gt;inherit&lt;/tt&gt; in Chiron.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	&lt;tt&gt;isEmpty&lt;/tt&gt;
+&lt;/h3&gt;
+&lt;p&gt;&lt;tt&gt;isEmpty&lt;/tt&gt; would return whether an object has any properties, other than those inherited.  Sounds fine to me, although I probably would have just used number and boolean casting.  This is a good idea too though, because in JavaScript, it's hard to distinguish an Object that is being used as the base of the inheritance tree and an Object that is being used as a hash-map.  To that end, I recommend the addition of a &lt;tt&gt;Map&lt;/tt&gt; type.  &lt;tt&gt;Map&lt;/tt&gt; would have &lt;tt&gt;isEmpty&lt;/tt&gt;, &lt;tt&gt;number&lt;/tt&gt;, and &lt;tt&gt;boolean&lt;/tt&gt; functions and would implicitly cast to &lt;tt&gt;Number&lt;/tt&gt; and &lt;tt&gt;Boolean&lt;/tt&gt; based on their &lt;tt&gt;length&lt;/tt&gt; that would be reflected publically by the &lt;tt&gt;getLength&lt;/tt&gt; function.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	Array Methods
+&lt;/h3&gt;
+&lt;p&gt;Doug recommends the addition of some of Mozilla's JavaScript 1.6 Array methods.  I support all of them.  However, some nomenclature refinements and specifications:&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;indexOf&lt;/tt&gt; should be augmented by a &lt;tt&gt;find&lt;/tt&gt; function that throws a &lt;tt&gt;KeyError&lt;/tt&gt; instead of returning a negative index.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;lastIndexOf&lt;/tt&gt; should be augmented by a &lt;tt&gt;findLast&lt;/tt&gt; function similar to &lt;tt&gt;find&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;every&lt;/tt&gt; should be called &lt;tt&gt;all&lt;/tt&gt;.  This function should accept an iterator or iterable and short circuit on the first failure.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;filter&lt;/tt&gt; should be called &lt;tt&gt;where&lt;/tt&gt;.  Filtering implies the opposite of finding.  To filter something is to remove it from a stream if it passes a particular condition.  &lt;tt&gt;where&lt;/tt&gt; implies that the outgoing stream should contain only those elements from the original stream that affirm the guard.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;forEach&lt;/tt&gt; is good as is.  I would like to specify that it should return &lt;tt&gt;this&lt;/tt&gt; so that &lt;tt&gt;forEach&lt;/tt&gt; calls can be chained.  This has implications on iterations that are partially consumed by a &lt;tt&gt;forEach&lt;/tt&gt; call that throws a &lt;tt&gt;StopIteration&lt;/tt&gt; exception in its continuation.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;map&lt;/tt&gt; is good as is. As a member of an array, &lt;tt&gt;each&lt;/tt&gt; should be a synonym. These functions should also be declared in global scope with opposite argument order: &lt;tt&gt;map(function, collection, [context])&lt;/tt&gt; vs &lt;tt&gt;each(collection, function, [context])&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;some&lt;/tt&gt; should be called &lt;tt&gt;any&lt;/tt&gt;.  This function should accept an iterator or iterable and short circuit on the first success.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	String Methods
+&lt;/h3&gt;
+&lt;p&gt;&lt;tt&gt;trim&lt;/tt&gt; is good as is.  There should also be &lt;tt&gt;trimBegin&lt;/tt&gt; and &lt;tt&gt;trimEnd&lt;/tt&gt; or &lt;tt&gt;trimFirst&lt;/tt&gt; and &lt;tt&gt;trimLast&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;string.eval&lt;/tt&gt; is a good idea, but I've got my own ways to launder the scope chain for &lt;tt&gt;eval&lt;/tt&gt;.&lt;/p&gt;
+
+
+&lt;h3&gt;
+	Date Methods
+&lt;/h3&gt;
+&lt;p&gt;&lt;tt&gt;Date.toJSONString&lt;/tt&gt; and &lt;tt&gt;Date.toISOString&lt;/tt&gt; are both great ideas; not having them has been a problem for me in the past.  I recommend calling them &lt;tt&gt;toJsonString&lt;/tt&gt; and &lt;tt&gt;toIsoString&lt;/tt&gt;.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Corrections
+&lt;/h2&gt;
+
+
+&lt;h3&gt;
+	Reserved Words
+&lt;/h3&gt;
+&lt;p&gt;Doug argues that identifiers in object literal notation and member dot notation should allow reserved words.  I concur.  It's a small syntax shortcut that identifiers used in member selection and object literal notation are not required to be enquoted; the language should be equally permissive for both syntax forms.&lt;/p&gt;
+&lt;p&gt;Doug also argues that the list of reserved words is too long.  I have mixed feelings.  On one hand, having a long list of reserved identifiers leaves open the door for future advances in the language (some of which include type annotations, which I find dubious).  On the other hand, they muddy the name space for current code.  On the latter note, it's important that all browsers are equally strict.  Safari, at the moment, is much more strict than other browsers, so I've been surprised.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Object Literal Notation
+&lt;/h2&gt;
+&lt;p&gt;I agree that commas should be more regular throughout the language.  They should be permitted after any value, including the last in an Object or Array literal without affecting the length of either.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	&lt;tt&gt;arguments&lt;/tt&gt;
+&lt;/h2&gt;
+&lt;p&gt;&lt;tt&gt;arguments&lt;/tt&gt; should definitely be an instance of an &lt;tt&gt;Arguments&lt;/tt&gt; type that inherits from &lt;tt&gt;Array&lt;/tt&gt;.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Inner Functions and the Context Object (&lt;tt&gt;this&lt;/tt&gt;)
+&lt;/h2&gt;
+&lt;p&gt;I agree that &lt;tt&gt;this&lt;/tt&gt; should not be the global object (&lt;tt&gt;window&lt;/tt&gt;) in inner or anonymous functions.  &lt;tt&gt;this&lt;/tt&gt; should be acquired from the scope chain in such closures.  Doug claims that this is not the standard.  I recall being corrected on this point, but I also recall having been under the same impression.  I leave this as an exercise to the reader to determine the current state of affairs in various browsers.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Tail Recursion
+&lt;/h2&gt;
+&lt;p&gt;Tail recursion would be nice.&lt;/p&gt;
+
+
+&lt;h2&gt;
+	Deprecation
+&lt;/h2&gt;
+&lt;p&gt;Primitive wrappers should be eliminated.  Boxing is almost never necessary.  In fact, the use of the &lt;tt&gt;new&lt;/tt&gt; keyword could be completely obviated and code would become much more reusable since there would be no distinction between a factory method and an object constructor.&lt;/p&gt;
+&lt;p&gt;I actually use the &lt;tt&gt;with&lt;/tt&gt; statement in a couple cases that are really important.  I don't recommend using it for its designed purpose, but I really do need it to stay in the language for my module system and my JavaScript shell to keep working.  FireBug, in particular, depends on this feature.&lt;/p&gt;
+&lt;p&gt;Semicolon insertion was silly.  Off with its head.&lt;/p&gt;
+&lt;p&gt;I don't particularly care about &lt;tt&gt;arguments.callee&lt;/tt&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;tt&gt;typeof&lt;/tt&gt; has to go.&lt;/p&gt;
+&lt;p&gt;Again, &lt;tt&gt;eval&lt;/tt&gt; is a necessary part of my perverse world.  I can do my own laundry.  There are, however, irresponsible uses of &lt;tt&gt;eval&lt;/tt&gt; that I do not condone.&lt;/p&gt;
+</ns0:content><ns0:updated>2008-09-30T13:55:58.479-07:00</ns0:updated><ns0:published>2008-04-24T18:40:00.001-07:00</ns0:published><ns0:title type="text">Re: Recommendations for the Fourth Edition of the ECMAScript
+Programming Language Specification</ns0:title><ns0:link href="http://askawizard.blogspot.com/feeds/8512448541777321971/comments/default" rel="replies" title="Post Comments" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/comment.g?blogID=3618780804544792727&amp;postID=8512448541777321971" rel="replies" title="0 Comments" type="text/html" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8512448541777321971" rel="edit" type="application/atom+xml" /><ns0:link href="http://www.blogger.com/feeds/3618780804544792727/posts/default/8512448541777321971" rel="self" type="application/atom+xml" /><ns0:link href="http://askawizard.blogspot.com/2008/04/re-recommendations-for-fourth-edition_24.html" rel="alternate" title="Re: Recommendations for the Fourth Edition of the ECMAScript Programming Language Specification" type="text/html" /></ns0:entry>

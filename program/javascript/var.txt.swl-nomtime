@@ -1,0 +1,67 @@
+1><tt>var</tt> Considered Harmful
+
+Please don't use <tt>var</tt> in global scope.  The <tt>var</tt> declaration (for declaring variables for a scope) behaves differently in global scope than in any other scope.  This muddies the semantics of your code and, on a selfish note, diminishes repurposability when porting your code to a module system.
+
+I propose an idiom.  Use <tt>var</tt> for private data, and hang public data off of <tt>this</tt>.  This is a simple and lucid rule that anyone can follow without seeing the gore.  It also happens to work in constructor functions just as well as it does in modules.
+
+">
+ this.method = function () {
+ };
+/>
+
+Some background: the <tt>var</tt> declaration has a host of nuanced behaviors, with subtle variations depending on browsers.  To avoid some of these nuances, it's best to only declare variables in the outer-most scope of a function.
+
+">
+ this.get = function (key, defaultValue) {
+  var hashKey = hash(key);
+ };
+/>
+
+If you stick to this rule, you'll avoid all of the special cases.  Your variables will always be private, and they'll always appear where you would expect on the scope chain.  If you put a <tt>var</tt> in global scope, your variables will actually be "public", that is, they will be hung off of "this", which happens to be the "window" object.  These statements are equivalent <i>only</i> in global scope:
+
+">
+ var a = 10;
+ this.a = 10;
+ window.a = 10;
+/>
+
+Be explicit.  Use <tt>this.a = 10</tt> if that's what you mean.  Otherwise, create an anonymous function enclosure to privatize your data.
+
+">
+ (function () {
+  var a = 10;
+ })();
+/>
+
+Of course, <b>minimize your footprint on global scope</b>.  This will increase your library's portability.  Zero footprint is ideal and possible; use <a href="http://modulesjs.com">modules.js</a> to load your modules.  The only trick is that, when you load a module with <tt>modules.js</tt>, all of your <tt>var</tt> declarations in global scope are actually private, and <tt>this</tt> is your file's unique module object instead of the <tt>window</tt> object.  So, if you live by the rule, <tt>var</tt> is private, <tt>this</tt> is public, your code will be more portable.
+
+Instead of:
+">
+ var MyLibrary = new function () {
+ };
+/>
+
+Do:
+
+">
+ this.MyLibrary = new function () {
+ };
+/>
+
+
+Of course, if you're writing a module specifically for <tt>module.js</tt>, you don't need to insulate your module; I've already done that for you.  You can just hang your methods off of the module object so other people can <tt>include</tt> them in their modules or <tt>require</tt> and name the module object if they want.
+
+">
+ (a.js)
+ this.a = 10;
+/>
+
+">
+ (b.js)
+ include("a.js")
+ a == 10;
+ var A = require('a.js');
+ A.a == 10;
+/>
+
+Thanks.

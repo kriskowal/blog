@@ -1,0 +1,23 @@
+1> New Character Sprites
+
+I completely recreated the rider (or stand-alone character) for the Tale sprite graphic.  The major goal was to represent both genders equally in the game.  On the way, I created several hair styles and facial expressions, articulated the arms into three positions for each gender, and created a lot of layers.  Here's the breakdown:
+
+*>
+    male or female
+    round, oval, or angular head
+    arms out stretched, bent for holding shields and such, or hanging at your sides
+    shirt with detachable sleeves
+    pants or shorts
+    shoes, boots, or sandals
+    buckler, roman shield, hero shield
+    long or short, lobed or round ears
+    11 hair styles
+    14 facial expressions
+/>
+
+Here are a couple samples of riders:
+
+< /~kris.kowal/bdoc/program/tale/2007-02-11/llamacorn-rider-400.png >
+
+< /~kris.kowal/bdoc/program/tale/2007-02-11/rhino-rider-400.png >
+
